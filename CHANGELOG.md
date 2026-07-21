@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - 2026-07-21
+## [2.0.0] - 2026-07-21
 ### Added
 - **Package Rename**: `icon-vista` has been officially renamed to `iconcodegen` for better discoverability. This is the first release under the new npm namespace.
 

@@ -2,7 +2,7 @@ import { Navbar } from "@/components/Navbar";
 
 const releases = [
   {
-    version: "1.0.0",
+    version: "2.0.0",
     date: "July 21, 2026",
     latest: true,
     added: [
