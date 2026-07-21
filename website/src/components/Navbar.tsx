@@ -12,7 +12,7 @@ export function Navbar() {
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
             </svg>
           </div>
-          <span>icon-vista</span>
+          <span>iconcodegen</span>
         </Link>
 
         {/* Nav Links */}
@@ -20,12 +20,12 @@ export function Navbar() {
           <Link href="/" className="text-sm text-slate-400 hover:text-white transition-colors">Home</Link>
           <Link href="/docs" className="text-sm text-slate-400 hover:text-white transition-colors">Docs</Link>
           <Link href="/changelog" className="text-sm text-slate-400 hover:text-white transition-colors">Changelog</Link>
-          <a href="https://github.com/nibin-org/icon-vista" target="_blank" rel="noreferrer" className="text-sm text-slate-400 hover:text-white transition-colors">GitHub</a>
+          <a href="https://github.com/nibin-org/iconcodegen" target="_blank" rel="noreferrer" className="text-sm text-slate-400 hover:text-white transition-colors">GitHub</a>
         </div>
 
         {/* CTA */}
         <a
-          href="https://www.npmjs.com/package/icon-vista"
+          href="https://www.npmjs.com/package/iconcodegen"
           target="_blank"
           rel="noreferrer"
           className="hidden sm:flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-white transition-all"

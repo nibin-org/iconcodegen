@@ -335,8 +335,8 @@
     const colorPickerArea    = document.getElementById('colorPickerArea');
     const codeSnippet        = document.getElementById('codeSnippet');
 
-    let currentLang = localStorage.getItem('iconvista_lang') || 'ts';
-    let currentStyle = localStorage.getItem('iconvista_style') || 'standard';
+    let currentLang = localStorage.getItem('iconcodegen_lang') || 'ts';
+    let currentStyle = localStorage.getItem('iconcodegen_style') || 'standard';
 
     function updateSliderFill() {
       const min = sizeInput.min || 12;
@@ -384,7 +384,7 @@
     }
 
     // ── Swatch row ────────────────────────────────────────
-    const RECENT_KEY = 'iconvista_recent_colors';
+    const RECENT_KEY = 'iconcodegen_recent_colors';
     const RECENT_MAX = 5;
 
     function getRecentColors() {
@@ -642,11 +642,11 @@
         btn.classList.add('active');
         if (type === 'lang') {
           currentLang = val;
-          localStorage.setItem('iconvista_lang', val);
+          localStorage.setItem('iconcodegen_lang', val);
         }
         if (type === 'style') {
           currentStyle = val;
-          localStorage.setItem('iconvista_style', val);
+          localStorage.setItem('iconcodegen_style', val);
         }
         updateCodeSnippet();
       });

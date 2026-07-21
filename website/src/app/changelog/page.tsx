@@ -2,9 +2,22 @@ import { Navbar } from "@/components/Navbar";
 
 const releases = [
   {
-    version: "1.2.1",
+    version: "1.0.0",
     date: "July 21, 2026",
     latest: true,
+    added: [
+      {
+        title: "Package Rename",
+        desc: "icon-vista has been officially renamed to iconcodegen for better SEO and discoverability. This marks the first release under the new npm namespace.",
+      }
+    ],
+    changed: [],
+    fixed: [],
+  },
+  {
+    version: "1.2.1",
+    date: "July 21, 2026",
+    latest: false,
     added: [
       {
         title: "CI Status",
@@ -222,7 +235,7 @@ const releases = [
     added: [
       {
         title: "Initial Release",
-        desc: "First public release of icon-vista.",
+        desc: "First public release of iconcodegen.",
       },
       {
         title: "Visual Search Engine",
@@ -291,7 +304,7 @@ export default function ChangelogPage() {
             <p className="text-xs font-bold text-brand-purple uppercase tracking-widest mb-4">Changelog</p>
             <h1 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight">Release History</h1>
             <p className="text-slate-400 text-lg max-w-xl leading-relaxed">
-              Every feature, fix, and improvement — documented per release. icon-vista follows{" "}
+              Every feature, fix, and improvement — documented per release. iconcodegen follows{" "}
               <a href="https://semver.org" target="_blank" rel="noreferrer" className="text-brand-cyan hover:underline">Semantic Versioning</a>.
             </p>
           </div>
@@ -316,7 +329,7 @@ export default function ChangelogPage() {
                     {/* Version Header */}
                     <div className="flex flex-wrap items-center gap-3 mb-8">
                       <a
-                        href={`https://github.com/nibin-org/icon-vista/releases/tag/v${release.version}`}
+                        href={`https://github.com/nibin-org/iconcodegen/releases/tag/v${release.version}`}
                         target="_blank"
                         rel="noreferrer"
                         className="text-2xl font-black text-white hover:text-brand-cyan transition-colors tracking-tight"
@@ -337,7 +350,7 @@ export default function ChangelogPage() {
 
                     {/* GitHub Link */}
                     <a
-                      href={`https://github.com/nibin-org/icon-vista/releases/tag/v${release.version}`}
+                      href={`https://github.com/nibin-org/iconcodegen/releases/tag/v${release.version}`}
                       target="_blank"
                       rel="noreferrer"
                       className="inline-flex items-center gap-2 text-xs text-slate-500 hover:text-slate-300 mt-4 transition-colors"

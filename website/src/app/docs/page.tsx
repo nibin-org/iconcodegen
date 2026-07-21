@@ -74,7 +74,7 @@ export default function DocsPage() {
 
           <div className="mt-auto pt-8">
             <a
-              href="https://github.com/nibin-org/icon-vista/issues"
+              href="https://github.com/nibin-org/iconcodegen/issues"
               target="_blank"
               rel="noreferrer"
               className="flex items-center gap-2 text-xs text-slate-500 hover:text-slate-300 transition-colors"
@@ -92,7 +92,7 @@ export default function DocsPage() {
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
               Documentation
             </div>
-            <h1 className="text-4xl font-black text-white mb-4 tracking-tight">icon-vista</h1>
+            <h1 className="text-4xl font-black text-white mb-4 tracking-tight">iconcodegen</h1>
             <p className="text-lg text-slate-400 leading-relaxed">
               A zero-config local CLI tool that opens a beautiful search dashboard for 200,000+ open-source icons — with one-click strictly-typed React component generation.
             </p>
@@ -101,10 +101,10 @@ export default function DocsPage() {
           <div className="space-y-16">
             <Section id="getting-started" title="Getting Started">
               <p>
-                <strong className="text-white">icon-vista</strong> requires Node.js 18+ and an existing React or Next.js project. You do not need to install it globally — `npx` handles everything.
+                <strong className="text-white">iconcodegen</strong> requires Node.js 18+ and an existing React or Next.js project. You do not need to install it globally — `npx` handles everything.
               </p>
               <p>Start by running the one-time initialization command inside your project root:</p>
-              <CodeBlock code="npx icon-vista init" lang="bash" />
+              <CodeBlock code="npx iconcodegen init" lang="bash" />
               <p>The CLI will ask you two questions interactively:</p>
               <div className="glass-panel rounded-xl p-5 space-y-3">
                 <div className="flex items-start gap-3">
@@ -122,14 +122,14 @@ export default function DocsPage() {
                   </div>
                 </div>
               </div>
-              <p>This creates an <code className="text-slate-200 bg-white/5 px-1.5 py-0.5 rounded text-sm">icon-vista.json</code> file in your project root. You only need to run init once per project.</p>
+              <p>This creates an <code className="text-slate-200 bg-white/5 px-1.5 py-0.5 rounded text-sm">iconcodegen.json</code> file in your project root. You only need to run init once per project.</p>
             </Section>
 
             <Section id="running" title="Running the Dashboard">
               <p>After initialization, launch the visual search dashboard with:</p>
-              <CodeBlock code="npx icon-vista" lang="bash" />
+              <CodeBlock code="npx iconcodegen" lang="bash" />
               <p>This starts a local Express server (defaulting to port 3000, auto-incrementing if busy) and automatically opens the UI in your default browser. The terminal will confirm:</p>
-              <CodeBlock code={`🚀 icon-vista is running at http://localhost:3000\nSaving icons to: ./src/components/icons`} lang="bash" />
+              <CodeBlock code={`🚀 iconcodegen is running at http://localhost:3000\nSaving icons to: ./src/components/icons`} lang="bash" />
               <Note>The dashboard is fully local. Nothing you do is sent to any external server (unless you are using the Iconify provider, which fetches SVGs from the public Iconify CDN on demand).</Note>
 
               <h3 className="text-white font-bold text-lg mt-8 mb-3">Dashboard Features</h3>
@@ -157,7 +157,7 @@ export default function DocsPage() {
 
             <Section id="untitled-ui" title="Provider: Untitled UI Pro (Premium)">
               <p>
-                icon-vista includes a unique <strong className="text-white">Reverse-Rendering Engine</strong> built for teams using <a href="https://untitledui.com" target="_blank" rel="noreferrer" className="text-brand-purple hover:underline">Untitled UI Pro</a>. Instead of reading SVG files from disk, it dynamically renders the React components from the npm package into raw SVG strings in memory, then serves them to the dashboard — completely offline.
+                iconcodegen includes a unique <strong className="text-white">Reverse-Rendering Engine</strong> built for teams using <a href="https://untitledui.com" target="_blank" rel="noreferrer" className="text-brand-purple hover:underline">Untitled UI Pro</a>. Instead of reading SVG files from disk, it dynamically renders the React components from the npm package into raw SVG strings in memory, then serves them to the dashboard — completely offline.
               </p>
 
               <Warning>This provider requires that you have separately purchased a license for Untitled UI Pro and have access to their private npm registry.</Warning>
@@ -171,11 +171,11 @@ export default function DocsPage() {
                 </div>
                 <div className="glass-panel rounded-xl p-5">
                   <p className="text-xs font-bold text-brand-purple uppercase tracking-widest mb-3">Step 2 — Initialize with untitled-ui</p>
-                  <CodeBlock code={`npx icon-vista init\n# → Select: untitled-ui`} lang="bash" />
+                  <CodeBlock code={`npx iconcodegen init\n# → Select: untitled-ui`} lang="bash" />
                 </div>
                 <div className="glass-panel rounded-xl p-5">
                   <p className="text-xs font-bold text-brand-purple uppercase tracking-widest mb-3">Step 3 — Launch</p>
-                  <CodeBlock code="npx icon-vista" lang="bash" />
+                  <CodeBlock code="npx iconcodegen" lang="bash" />
                   <p className="text-sm mt-3 text-slate-400">The CLI will automatically discover all available style categories (`line`, `solid`, `duotone`, `duocolor`) and index your entire library. You will see a confirmation like:</p>
                   <CodeBlock code="✅ Successfully indexed 3,240 premium Untitled UI icons." lang="bash" />
                 </div>
@@ -184,7 +184,7 @@ export default function DocsPage() {
 
             <Section id="generated-component" title="Generated Component">
               <p>
-                When you save an icon, icon-vista generates a clean, production-ready React component. Here is an example of the TypeScript output for a Lucide arrow icon:
+                When you save an icon, iconcodegen generates a clean, production-ready React component. Here is an example of the TypeScript output for a Lucide arrow icon:
               </p>
               <CodeBlock code={`import * as React from "react";
 
@@ -213,7 +213,7 @@ export function ArrowRightIcon({
             </Section>
 
             <Section id="config" title="Configuration File">
-              <p>The <code className="text-slate-200 bg-white/5 px-1.5 py-0.5 rounded text-sm">icon-vista.json</code> file created at your project root controls all behavior:</p>
+              <p>The <code className="text-slate-200 bg-white/5 px-1.5 py-0.5 rounded text-sm">iconcodegen.json</code> file created at your project root controls all behavior:</p>
               <CodeBlock code={`{\n  "savePath": "./src/components/icons",\n  "provider": "iconify"\n}`} lang="json" />
               <div className="overflow-x-auto">
                 <table className="w-full text-sm border-collapse">
@@ -241,7 +241,7 @@ export function ArrowRightIcon({
             </Section>
 
             <Section id="api" title="API Reference">
-              <p>icon-vista runs a local Express server. These are the internal API endpoints it exposes to the dashboard UI:</p>
+              <p>iconcodegen runs a local Express server. These are the internal API endpoints it exposes to the dashboard UI:</p>
               <div className="space-y-4">
                 {[
                   { method: "GET", path: "/api/search", desc: "Search icons. Accepts `query`, `limit`, `start`, `packs`, `styles` query params. Returns `{ icons: string[] }`." },

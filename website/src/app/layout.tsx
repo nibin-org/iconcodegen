@@ -8,7 +8,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "icon-vista — Beautiful icons, instantly typed",
+  title: "iconcodegen — Beautiful icons, instantly typed",
   description: "Search across 200,000+ open-source icons. Click any icon to instantly generate a strictly-typed React component in your codebase.",
   icons: {
     icon: "/favicon.svg",

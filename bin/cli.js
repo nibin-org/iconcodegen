@@ -13,7 +13,7 @@ const __dirname = path.dirname(__filename);
 const projectRoot = path.join(__dirname, '..');
 const cwd = process.cwd();
 
-const CONFIG_FILE = path.join(cwd, 'icon-vista.json');
+const CONFIG_FILE = path.join(cwd, 'iconcodegen.json');
 
 const args = process.argv.slice(2);
 
@@ -38,7 +38,7 @@ if (args[0] === 'init') {
     rl.question('Which icon provider do you want to use? [iconify | untitled-ui] (default: iconify) ', (answer2) => {
       const provider = answer2.trim() || 'iconify';
       fs.writeFileSync(CONFIG_FILE, JSON.stringify({ savePath, provider }, null, 2));
-      console.log(`\n✅ Configuration saved to icon-vista.json`);
+      console.log(`\n✅ Configuration saved to iconcodegen.json`);
       console.log(`Icons will be saved to: ${savePath}`);
       console.log(`Using provider: ${provider}\n`);
       rl.close();
@@ -46,7 +46,7 @@ if (args[0] === 'init') {
   });
 } else {
   if (!fs.existsSync(CONFIG_FILE)) {
-    console.error('❌ Configuration not found. Please run `npx icon-vista init` first.');
+    console.error('❌ Configuration not found. Please run `npx iconcodegen init` first.');
     process.exit(1);
   }
 
@@ -193,9 +193,9 @@ if (args[0] === 'init') {
 
   function startServer(port) {
     const server = app.listen(port, '127.0.0.1', () => {
-      console.log(`\n🚀 icon-vista is running at http://127.0.0.1:${port}`);
+      console.log(`\n🚀 iconcodegen is running at http://127.0.0.1:${port}`);
       console.log(`📂 Saving icons to: ${config.savePath}`);
-      console.log(`📚 Documentation: https://icon-vista.vercel.app\n`);
+      console.log(`📚 Documentation: https://iconcodegen.vercel.app\n`);
       
       if (!isHeadless) {
         const url = `http://127.0.0.1:${port}`;
