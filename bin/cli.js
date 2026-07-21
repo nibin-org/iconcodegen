@@ -88,7 +88,22 @@ if (args[0] === 'init') {
     return { componentCode, fileName };
   }
 
-  app.post('/api/download', async (req, res) => {
+  const requireLocalOrigin = (req, res, next) => {
+    const origin = req.headers.origin || req.headers.referer;
+    if (origin) {
+      try {
+        const url = new URL(origin);
+        if (url.hostname !== '127.0.0.1') {
+          return res.status(403).json({ error: 'Forbidden: Invalid origin' });
+        }
+      } catch (err) {
+        return res.status(403).json({ error: 'Forbidden: Invalid origin URL' });
+      }
+    }
+    next();
+  };
+
+  app.post('/api/download', requireLocalOrigin, async (req, res) => {
     try {
       const { icon_id, customizations } = req.body;
       const { componentCode, fileName } = await fetchAndGenerateCode(icon_id, customizations);
@@ -103,11 +118,12 @@ if (args[0] === 'init') {
       res.json({ success: true, message: `Saved ${fileName}`, fileName, filePath });
     } catch (err) {
       console.error(err);
-      res.status(500).json({ error: err.message });
+      const status = err.message.includes('required') ? 400 : (err.message.includes('not found') ? 404 : 500);
+      res.status(status).json({ error: err.message });
     }
   });
 
-  app.post('/api/generate-snippet', async (req, res) => {
+  app.post('/api/generate-snippet', requireLocalOrigin, async (req, res) => {
     try {
       const { icon_id, customizations } = req.body;
       const { componentCode } = await fetchAndGenerateCode(icon_id, customizations);
@@ -115,7 +131,8 @@ if (args[0] === 'init') {
       res.json({ success: true, code: componentCode });
     } catch (err) {
       console.error(err);
-      res.status(500).json({ error: err.message });
+      const status = err.message.includes('required') ? 400 : (err.message.includes('not found') ? 404 : 500);
+      res.status(status).json({ error: err.message });
     }
   });
 
@@ -153,8 +170,11 @@ if (args[0] === 'init') {
   app.get('/api/svg', async (req, res) => {
     try {
       const id = req.query.id;
+      if (!id) {
+        return res.status(400).json({ error: 'icon id is required' });
+      }
       let svg = await activeProvider.getSvg(id);
-      if (!svg) return res.status(404).send('Not found');
+      if (!svg) return res.status(404).json({ error: 'Not found' });
       
       if (req.query.color) {
         svg = svg.replace(/currentColor/gi, req.query.color);
@@ -163,7 +183,7 @@ if (args[0] === 'init') {
       res.setHeader('Content-Type', 'image/svg+xml');
       res.send(svg);
     } catch (err) {
-      res.status(500).send(err.message);
+      res.status(500).json({ error: err.message });
     }
   });
 
@@ -172,13 +192,13 @@ if (args[0] === 'init') {
   });
 
   function startServer(port) {
-    const server = app.listen(port, () => {
-      console.log(`\n🚀 icon-vista is running at http://localhost:${port}`);
+    const server = app.listen(port, '127.0.0.1', () => {
+      console.log(`\n🚀 icon-vista is running at http://127.0.0.1:${port}`);
       console.log(`📂 Saving icons to: ${config.savePath}`);
       console.log(`📚 Documentation: https://icon-vista.vercel.app\n`);
       
       if (!isHeadless) {
-        const url = `http://localhost:${port}`;
+        const url = `http://127.0.0.1:${port}`;
         const startCmd = process.platform === 'win32' ? 'start' : process.platform === 'darwin' ? 'open' : 'xdg-open';
         exec(`${startCmd} ${url}`).on('error', () => {
            console.log(`Failed to open browser automatically. Please visit ${url}`);

@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.2.1] - 2026-07-21
+### Added
+- **CI Status**: Added GitHub Actions CI badge to the README.
+- **Security**: Added origin verification middleware to prevent CSRF on write endpoints (`/api/download` and `/api/generate-snippet`).
+
+### Changed
+- **API Errors**: Standardized API error responses to return proper JSON objects (`{"error": "..."}`) and appropriate HTTP status codes (400, 404, 500) across all endpoints.
+
+### Fixed
+- **Security**: Fixed a security vulnerability by binding the local Express server explicitly to `127.0.0.1` instead of all network interfaces (`0.0.0.0`).
+- **Error Handling**: Fixed missing `icon_id` validation in the `/api/svg` endpoint, preventing bare string 500 errors.
 ## [1.2.0] - 2026-06-26
 ### Added
 - **SVGR AST Parsing**: Completely rewrote the React component generator to use `@svgr/core` instead of fragile regex string manipulation, guaranteeing 100% syntactically correct JSX AST generation.

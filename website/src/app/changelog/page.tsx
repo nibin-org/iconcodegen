@@ -2,9 +2,40 @@ import { Navbar } from "@/components/Navbar";
 
 const releases = [
   {
+    version: "1.2.1",
+    date: "July 21, 2026",
+    latest: true,
+    added: [
+      {
+        title: "CI Status",
+        desc: "Added GitHub Actions CI badge to the README.",
+      },
+      {
+        title: "Security",
+        desc: "Added origin verification middleware to prevent CSRF on write endpoints (/api/download and /api/generate-snippet).",
+      },
+    ],
+    changed: [
+      {
+        title: "API Errors",
+        desc: "Standardized API error responses to return proper JSON objects and appropriate HTTP status codes (400, 404, 500) across all endpoints.",
+      },
+    ],
+    fixed: [
+      {
+        title: "Security",
+        desc: "Fixed a security vulnerability by binding the local Express server explicitly to 127.0.0.1 instead of all network interfaces (0.0.0.0).",
+      },
+      {
+        title: "Error Handling",
+        desc: "Fixed missing icon_id validation in the /api/svg endpoint, preventing bare string 500 errors.",
+      },
+    ],
+  },
+  {
     version: "1.2.0",
     date: "June 26, 2026",
-    latest: true,
+    latest: false,
     added: [
       {
         title: "AST-based SVG Parsing",

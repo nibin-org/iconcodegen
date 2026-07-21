@@ -3,6 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/icon-vista.svg?style=flat-square&color=7c3aed)](https://www.npmjs.com/package/icon-vista)
 [![npm downloads](https://img.shields.io/npm/dm/icon-vista.svg?style=flat-square&color=06b6d4)](https://www.npmjs.com/package/icon-vista)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/nibin-org/icon-vista/release.yml?style=flat-square)](https://github.com/nibin-org/icon-vista/actions/workflows/release.yml)
 
 A beautiful, local CLI dashboard to search, customize, and strictly type React icons directly into your codebase. By default, it searches across 200,000+ open-source icons via Iconify. It also features a built-in enterprise plugin to seamlessly integrate premium, private icon libraries like **Untitled UI Pro**.
 
