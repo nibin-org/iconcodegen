@@ -2,9 +2,26 @@ import { Navbar } from "@/components/Navbar";
 
 const releases = [
   {
-    version: "2.1.1",
+    version: "2.1.2",
     date: "July 31, 2026",
     latest: true,
+    added: [],
+    changed: [],
+    fixed: [
+      {
+        title: "Architecture",
+        desc: "Decoupled the CLI server execution block to strictly lock out tests, allowing proper unit testing of Express middleware.",
+      },
+      {
+        title: "Symlink Resolution",
+        desc: "Fixed a critical execution bug where running the tool via npm global symlink (iconcodegen) would silently fail because Node.js ES Modules enforce strict import.meta.url realpath comparisons.",
+      }
+    ],
+  },
+  {
+    version: "2.1.1",
+    date: "July 31, 2026",
+    latest: false,
     added: [],
     changed: [],
     fixed: [

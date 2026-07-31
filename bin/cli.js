@@ -8,12 +8,33 @@ import { exec } from 'child_process';
 import { generateReactIcon } from '../templates/react-icon.js';
 import { getProvider } from './providers.js';
 
+export let app;
+
+export const requireLocalOrigin = (req, res, next) => {
+  const origin = req.headers.origin || req.headers.referer;
+  if (!origin) {
+    return res.status(403).json({ error: 'Forbidden: Missing origin' });
+  }
+  try {
+    const url = new URL(origin);
+    if (url.hostname !== '127.0.0.1') {
+      return res.status(403).json({ error: 'Forbidden: Invalid origin' });
+    }
+  } catch (err) {
+    return res.status(403).json({ error: 'Forbidden: Invalid origin URL' });
+  }
+  next();
+};
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.join(__dirname, '..');
 const cwd = process.cwd();
 
 const CONFIG_FILE = path.join(cwd, 'iconcodegen.json');
+
+const isMain = process.argv[1] && fs.realpathSync(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMain) {
 
 const args = process.argv.slice(2);
 
@@ -61,7 +82,7 @@ if (args[0] === 'init') {
     process.exit(1);
   }
 
-  const app = express();
+  app = express();
   app.use(express.json());
   
   // Serve public folder
@@ -87,22 +108,6 @@ if (args[0] === 'init') {
 
     return { componentCode, fileName, iconName };
   }
-
-  const requireLocalOrigin = (req, res, next) => {
-    const origin = req.headers.origin || req.headers.referer;
-    if (!origin) {
-      return res.status(403).json({ error: 'Forbidden: Missing origin' });
-    }
-    try {
-      const url = new URL(origin);
-      if (url.hostname !== '127.0.0.1') {
-        return res.status(403).json({ error: 'Forbidden: Invalid origin' });
-      }
-    } catch (err) {
-      return res.status(403).json({ error: 'Forbidden: Invalid origin URL' });
-    }
-    next();
-  };
 
   function updateIndexFile(targetPath, newExports, customizations) {
     if (!newExports || newExports.length === 0) return;
@@ -305,4 +310,6 @@ if (args[0] === 'init') {
   }
 
   startServer(startPort);
+}
+
 }

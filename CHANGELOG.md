@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.2] - 2026-07-31
+### Fixed
+- **Architecture**: Decoupled the CLI server execution block to strictly lock out tests, allowing proper unit testing of Express middleware.
+- **Symlink Resolution**: Fixed a critical execution bug where running the tool via npm global symlink (`iconcodegen`) would silently fail because Node.js ES Modules enforce strict `import.meta.url` realpath comparisons.
+
 ## [2.1.1] - 2026-07-31
 ### Fixed
 - **Security**: Hardened the local API server's CSRF protection by shifting from a fail-open to a fail-closed architecture. The `/api/download` and `/api/batch-generate` endpoints now explicitly reject requests that omit `Origin` or `Referer` headers.
