@@ -26,6 +26,21 @@ export const requireLocalOrigin = (req, res, next) => {
   next();
 };
 
+export const resolveIconName = (baseName, pattern = "{name}Icon") => {
+  if (typeof pattern !== 'string') pattern = "{name}Icon";
+  let rawName = pattern.replaceAll("{name}", baseName);
+  const parts = rawName.split(/[^a-zA-Z0-9]+/);
+  const pascalParts = parts.map(part => {
+    if (!part) return "";
+    return part.charAt(0).toUpperCase() + part.slice(1);
+  });
+  let finalName = pascalParts.join("");
+  if (/^[0-9]/.test(finalName)) {
+    finalName = "Icon" + finalName;
+  }
+  return finalName;
+};
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.join(__dirname, '..');
@@ -58,7 +73,7 @@ if (args[0] === 'init') {
     const savePath = answer.trim() || './src/components/icons';
     rl.question('Which icon provider do you want to use? [iconify | untitled-ui] (default: iconify) ', (answer2) => {
       const provider = answer2.trim() || 'iconify';
-      fs.writeFileSync(CONFIG_FILE, JSON.stringify({ savePath, provider }, null, 2));
+      fs.writeFileSync(CONFIG_FILE, JSON.stringify({ savePath, provider, iconNamePattern: "{name}Icon" }, null, 2));
       console.log(`\n✅ Configuration saved to iconcodegen.json`);
       console.log(`Icons will be saved to: ${savePath}`);
       console.log(`Using provider: ${provider}\n`);
@@ -72,6 +87,18 @@ if (args[0] === 'init') {
   }
 
   const config = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf-8'));
+  
+  if (config.iconNamePattern && typeof config.iconNamePattern === 'string' && !config.iconNamePattern.includes('{name}')) {
+    console.error(`❌ Invalid iconNamePattern in iconcodegen.json. The pattern must contain the "{name}" token.`);
+    process.exit(1);
+  }
+
+  const testResolved = resolveIconName("TestIcon", config.iconNamePattern);
+  if (!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(testResolved)) {
+    console.error(`❌ Invalid iconNamePattern in iconcodegen.json. The pattern "${config.iconNamePattern}" produces an invalid JavaScript identifier.`);
+    process.exit(1);
+  }
+
   const savePath = path.resolve(cwd, config.savePath);
   const providerName = config.provider || 'iconify';
 
@@ -100,7 +127,7 @@ if (args[0] === 'init') {
 
     const baseName = name.replace(/[^a-zA-Z0-9]+(.)/g, (m, chr) => chr.toUpperCase())
                         .replace(/^([a-z])/, (m, chr) => chr.toUpperCase());
-    const iconName = overrideIconName || `${baseName}Icon`;
+    const iconName = overrideIconName || resolveIconName(baseName, config.iconNamePattern);
     const ext = customizations.language === 'js' ? 'jsx' : 'tsx';
     const fileName = `${iconName}.${ext}`;
 
@@ -188,7 +215,7 @@ if (args[0] === 'init') {
         
         const baseName = name.replace(/[^a-zA-Z0-9]+(.)/g, (m, chr) => chr.toUpperCase())
                             .replace(/^([a-z])/, (m, chr) => chr.toUpperCase());
-        const defaultName = `${baseName}Icon`;
+        const defaultName = resolveIconName(baseName, config.iconNamePattern);
         map.push({ id, prefix, baseName, defaultName, finalName: defaultName });
         nameCounts[defaultName] = (nameCounts[defaultName] || 0) + 1;
       }
@@ -197,7 +224,7 @@ if (args[0] === 'init') {
         if (nameCounts[item.defaultName] > 1 && item.prefix) {
            const prefixCap = item.prefix.replace(/[^a-zA-Z0-9]+(.)/g, (m, c) => c.toUpperCase())
                                         .replace(/^([a-z])/, (m, c) => c.toUpperCase());
-           item.finalName = `${item.baseName}${prefixCap}Icon`;
+           item.finalName = resolveIconName(item.baseName + prefixCap, config.iconNamePattern);
         }
       }
 

@@ -108,6 +108,7 @@ IconCodegen detects the premium package, indexes all 4,700+ icons into memory, a
 |---|---|---|---|
 | `savePath` | string | `./src/components/icons` | Directory where generated components are saved |
 | `provider` | string | `iconify` | Active icon source (`iconify` or `untitled-ui`) |
+| `iconNamePattern` | string | `{name}Icon` | Enforces a strict component naming convention (e.g. `App{name}`, `{name}Icon`) |
 
 ---
 

@@ -2,9 +2,22 @@ import { Navbar } from "@/components/Navbar";
 
 const releases = [
   {
-    version: "2.1.2",
+    version: "2.2.0",
     date: "July 31, 2026",
     latest: true,
+    added: [
+      {
+        title: "Custom Naming Templates",
+        desc: "Added the iconNamePattern field to iconcodegen.json. You can now enforce strict team naming conventions (e.g. {name}Icon, App{name}) across both single and batch exports. All generated names are automatically validated and sanitized into compliant JavaScript identifiers.",
+      }
+    ],
+    changed: [],
+    fixed: [],
+  },
+  {
+    version: "2.1.2",
+    date: "July 31, 2026",
+    latest: false,
     added: [],
     changed: [],
     fixed: [

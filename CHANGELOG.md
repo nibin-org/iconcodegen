@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-07-31
+### Added
+- **Custom Naming Templates**: Added the `iconNamePattern` field to `iconcodegen.json`. You can now enforce strict team naming conventions (e.g. `{name}Icon`, `App{name}`, `{name}`) across both single and batch exports. All generated names are automatically validated and sanitized into compliant JavaScript identifiers.
+
 ## [2.1.2] - 2026-07-31
 ### Fixed
 - **Architecture**: Decoupled the CLI server execution block to strictly lock out tests, allowing proper unit testing of Express middleware.

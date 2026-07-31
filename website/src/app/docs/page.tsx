@@ -221,7 +221,7 @@ export function ArrowRightIcon({
 
             <Section id="config" title="Configuration File">
               <p>The <code className="text-slate-200 bg-white/5 px-1.5 py-0.5 rounded text-sm">iconcodegen.json</code> file created at your project root controls all behavior:</p>
-              <CodeBlock code={`{\n  "savePath": "./src/components/icons",\n  "provider": "iconify"\n}`} lang="json" />
+              <CodeBlock code={`{\n  "savePath": "./src/components/icons",\n  "provider": "iconify",\n  "iconNamePattern": "{name}Icon"\n}`} lang="json" />
               <div className="overflow-x-auto">
                 <table className="w-full text-sm border-collapse">
                   <thead>
@@ -241,6 +241,11 @@ export function ArrowRightIcon({
                       <td className="py-3 pr-6 font-mono text-brand-cyan">provider</td>
                       <td className="py-3 pr-6 text-slate-500">`iconify` | `untitled-ui`</td>
                       <td className="py-3 text-slate-400">The icon backend to use. Determines which search engine and SVG source is used.</td>
+                    </tr>
+                    <tr>
+                      <td className="py-3 pr-6 font-mono text-brand-cyan">iconNamePattern</td>
+                      <td className="py-3 pr-6 text-slate-500">string</td>
+                      <td className="py-3 text-slate-400">Enforces a strict component naming convention. Must contain the `{`name`}` token. Examples: `{`name`}Icon`, `App{`name`}`.</td>
                     </tr>
                   </tbody>
                 </table>
