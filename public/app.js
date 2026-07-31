@@ -7,6 +7,86 @@
     const grid = document.getElementById('grid');
     const toast = document.getElementById('toast');
     let debounceTimer;
+    let selectedIcons = new Map();
+    let isBatchMode = false;
+
+    function saveSelectionState() {
+      localStorage.setItem('iconcodegen_batch_selection', JSON.stringify(Array.from(selectedIcons.entries())));
+    }
+
+    function loadSelectionState() {
+      try {
+        const saved = localStorage.getItem('iconcodegen_batch_selection');
+        if (saved) {
+          selectedIcons = new Map(JSON.parse(saved));
+          if (selectedIcons.size > 0) updateBatchBar();
+        }
+      } catch (e) {
+        console.error('Failed to load selection state', e);
+      }
+    }
+
+    function toggleSelection(iconId, prefix, name, checked, cardEl) {
+      if (checked) {
+        selectedIcons.set(iconId, { prefix, name });
+        if (cardEl) {
+          cardEl.classList.add('selected');
+          cardEl.querySelector('.card-checkbox-wrap').classList.add('checked');
+        }
+      } else {
+        selectedIcons.delete(iconId);
+        if (cardEl) {
+          cardEl.classList.remove('selected');
+          cardEl.querySelector('.card-checkbox-wrap').classList.remove('checked');
+        }
+      }
+      updateBatchBar();
+      saveSelectionState();
+    }
+
+    window.removeBatchItem = function(id) {
+      selectedIcons.delete(id);
+      const card = document.querySelector(`.card[data-id="${id}"]`);
+      if (card) {
+        card.classList.remove('selected');
+        const cw = card.querySelector('.card-checkbox-wrap');
+        if (cw) cw.classList.remove('checked');
+      }
+      updateBatchBar();
+      saveSelectionState();
+      
+      const item = document.querySelector(`.batch-preview-item[data-id="${id}"]`);
+      if (item) item.remove();
+      
+      document.getElementById('modalIdName').textContent = `${selectedIcons.size} icons selected`;
+      document.getElementById('saveComponentBtn').innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> Add ${selectedIcons.size} Icons`;
+      
+      if (selectedIcons.size === 0) {
+        closeModal();
+      }
+    };
+
+    window.clearSelection = function() {
+      selectedIcons.clear();
+      document.querySelectorAll('.card').forEach(c => {
+        c.classList.remove('selected');
+        const cw = c.querySelector('.card-checkbox-wrap');
+        if (cw) cw.classList.remove('checked');
+      });
+      updateBatchBar();
+      saveSelectionState();
+    };
+
+    function updateBatchBar() {
+      const bar = document.getElementById('batchBar');
+      const count = document.getElementById('batchCount');
+      if (selectedIcons.size > 0) {
+        count.textContent = `${selectedIcons.size} icon${selectedIcons.size === 1 ? '' : 's'} selected`;
+        bar.classList.add('show');
+      } else {
+        bar.classList.remove('show');
+      }
+    }
 
     // Global Search Shortcuts
     document.addEventListener('keydown', (e) => {
@@ -210,6 +290,7 @@
     function createCard(iconId, prefix, name) {
       const card = document.createElement('div');
       card.className = 'card';
+      card.dataset.id = iconId;
 
       const preview = document.createElement('div');
       preview.className = 'icon-preview';
@@ -229,8 +310,32 @@
       spinner.className = 'card-spinner';
       spinner.innerHTML = '<div class="spinner-ring"></div>';
 
-      card.onclick = () => openModal(iconId, prefix, name);
+      const cbWrap = document.createElement('div');
+      cbWrap.className = 'card-checkbox-wrap';
+      cbWrap.innerHTML = `
+        <div class="custom-checkbox">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+      `;
 
+      if (selectedIcons.has(iconId)) {
+        card.classList.add('selected');
+        cbWrap.classList.add('checked');
+      }
+      
+      cbWrap.onclick = (e) => {
+        e.stopPropagation();
+        const isChecked = cbWrap.classList.contains('checked');
+        toggleSelection(iconId, prefix, name, !isChecked, card);
+      };
+      
+      card.onclick = () => {
+        openModal(iconId, prefix, name);
+      };
+
+      card.appendChild(cbWrap);
       card.appendChild(preview);
       card.appendChild(nameEl);
       card.appendChild(setEl);
@@ -347,7 +452,90 @@
     }
 
     // ── Open modal ────────────────────────────────────────
+    window.openBatchModal = async function() {
+      if (selectedIcons.size === 0) return;
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      document.body.style.paddingRight = scrollbarWidth + 'px';
+      document.body.style.overflow = 'hidden';
+      isBatchMode = true;
+      currentIconId = null;
+
+      isCurrentColor = false;
+      inheritToggle.checked = false;
+      colorPickerArea.classList.remove('dimmed');
+      setColor('#ffffff', false);
+      renderSwatchRow();
+      sizeInput.value = '24';
+      sizeValueEl.textContent = '24px';
+      setActiveSizePreset(24);
+      updateSliderFill();
+
+      document.getElementById('modalIdName').textContent = `${selectedIcons.size} icons selected`;
+      document.getElementById('modalIdSet').textContent = 'Batch Export';
+      document.getElementById('modalThumb').style.display = 'none';
+
+      modalPreview.classList.add('batch-mode');
+      const content = document.querySelector('.modal-content');
+      content.classList.add('drawer-mode');
+      content.style.transition = 'none';
+      void content.offsetWidth; // Force CSS reflow
+      content.style.transition = '';
+      modalPreview.innerHTML = '<div style="color:var(--text-tertiary);font-size:0.8rem;padding:1rem;width:100%;text-align:center;">Loading previews…</div>';
+
+      document.querySelector('.modal-code').style.display = 'none';
+      document.getElementById('downloadSvgBtn').style.display = 'none';
+      document.getElementById('copySvgBtn').style.display = 'none';
+
+      const saveBtn = document.getElementById('saveComponentBtn');
+      saveBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> Add ${selectedIcons.size} Icons`;
+
+      customizeModal.classList.add('show');
+
+      const initialSize = sizeInput.value || 24;
+      const boxSize = Math.max(initialSize, 40); // Base container size to pad the icons nicely
+
+      modalPreview.innerHTML = '';
+      for (const [id, data] of selectedIcons.entries()) {
+        const item = document.createElement('div');
+        item.className = 'batch-preview-item';
+        item.dataset.id = id;
+        item.innerHTML = `
+          <div class="batch-preview-icon" style="display:flex;align-items:center;justify-content:center;width:${boxSize}px;height:${boxSize}px;transition:width 0.1s, height 0.1s;">
+            <div class="spinner-ring" style="width:16px;height:16px;border-width:2px;border-top-color:var(--text-tertiary)"></div>
+          </div>
+          <button class="batch-remove-btn" title="Remove icon" onclick="removeBatchItem('${id}')">×</button>
+        `;
+        modalPreview.appendChild(item);
+        
+        try {
+          const res = await fetch(`/api/svg?id=${id}`);
+          const svgText = await res.text();
+          item.querySelector('.batch-preview-icon').innerHTML = svgText;
+        } catch (e) {
+          item.querySelector('.batch-preview-icon').innerHTML = '⚠';
+        }
+      }
+      updatePreview();
+    };
+
     async function openModal(iconId, prefix, name) {
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      document.body.style.paddingRight = scrollbarWidth + 'px';
+      document.body.style.overflow = 'hidden';
+      isBatchMode = false;
+      const content = document.querySelector('.modal-content');
+      modalPreview.classList.remove('batch-mode');
+      content.classList.remove('drawer-mode');
+      content.style.transition = 'none';
+      void content.offsetWidth; // Force CSS reflow
+      content.style.transition = '';
+      document.getElementById('modalThumb').style.display = '';
+      modalPreview.style.display = 'flex';
+      document.querySelector('.modal-code').style.display = '';
+      document.getElementById('downloadSvgBtn').style.display = 'flex';
+      document.getElementById('copySvgBtn').style.display = 'flex';
+      document.getElementById('saveComponentBtn').innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> Add to Project`;
+
       currentIconId = iconId;
       currentPrefix = prefix;
       currentName   = name;
@@ -380,6 +568,8 @@
     }
 
     function closeModal() {
+      document.body.style.paddingRight = '';
+      document.body.style.overflow = '';
       customizeModal.classList.remove('show');
     }
 
@@ -440,17 +630,8 @@
     }
 
     function applyColorToPreview() {
-      if (isCurrentColor) {
-        if (activeBg === 'light') {
-          modalPreview.style.color = '#0f172a';
-        } else if (activeBg === 'blue') {
-          modalPreview.style.color = '#ffffff';
-        } else {
-          modalPreview.style.color = 'currentColor';
-        }
-      } else {
-        modalPreview.style.color = colorHex.value;
-      }
+      const colorVal = isCurrentColor ? (activeBg === 'light' ? '#0f172a' : (activeBg === 'blue' ? '#ffffff' : 'currentColor')) : colorHex.value;
+      modalPreview.style.color = colorVal;
     }
 
     // ── Size helpers ──────────────────────────────────────
@@ -462,13 +643,26 @@
 
     // ── Update preview + code ─────────────────────────────
     function updatePreview() {
-      const svg = modalPreview.querySelector('svg');
-      if (!svg) return;
       const size = sizeInput.value || 24;
-      svg.setAttribute('width',  size);
-      svg.setAttribute('height', size);
-      applyColorToPreview();
-      updateCodeSnippet();
+      if (isBatchMode) {
+        const boxSize = Math.max(size, 40);
+        document.querySelectorAll('.batch-preview-icon').forEach(iconWrap => {
+          iconWrap.style.width = `${boxSize}px`;
+          iconWrap.style.height = `${boxSize}px`;
+        });
+        document.querySelectorAll('.batch-preview-item svg').forEach(svg => {
+          svg.setAttribute('width', size);
+          svg.setAttribute('height', size);
+        });
+        applyColorToPreview();
+      } else {
+        const svg = modalPreview.querySelector('svg');
+        if (!svg) return;
+        svg.setAttribute('width', size);
+        svg.setAttribute('height', size);
+        applyColorToPreview();
+        updateCodeSnippet();
+      }
     }
 
     let currentSnippetString = '';
@@ -497,9 +691,15 @@
             const escapedCode = data.code
               .replace(/</g, '&lt;')
               .replace(/>/g, '&gt;')
-              .replace(/([a-zA-Z0-9]+)=/g, '<span class="prop">$1</span>=')
-              .replace(/"([^"]*)"/g, '<span class="str">"$1"</span>')
-              .replace(/{([^}]*)}/g, '<span class="val">{$1}</span>');
+              // Match import statements string literals
+              .replace(/from "([^"]+)"/g, 'from <span class="str">"$1"</span>')
+              // Match JSX props like prop="string" or prop={value}
+              .replace(/([a-zA-Z0-9]+)=(".*?"|\{.*?\})/g, (match, propName, propValue) => {
+                const valHtml = propValue.startsWith('"') ? 
+                  `<span class="str">${propValue}</span>` : 
+                  `<span class="val">${propValue}</span>`;
+                return `<span class="prop">${propName}</span>=${valHtml}`;
+              });
             codeSnippet.innerHTML = escapedCode;
           } else {
             codeSnippet.innerHTML = `<span style="color:#ef4444">Error: ${data.error}</span>`;
@@ -523,7 +723,11 @@
     // ── Initial load ──────────────────────────────────────
     let currentProvider = 'iconify';
 
-    window.addEventListener('DOMContentLoaded', async () => {
+    document.addEventListener('DOMContentLoaded', async () => {
+      loadSelectionState();
+      document.fonts.ready.then(() => {
+        document.body.style.opacity = '1';
+      });
       document.querySelectorAll('.segment-btn').forEach(btn => {
         const type = btn.dataset.type;
         const val = btn.dataset.val;
@@ -658,7 +862,7 @@
         document.querySelectorAll('.bg-swatch').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         activeBg = btn.dataset.bg;
-        modalPreview.className = 'modal-preview';
+        modalPreview.classList.remove('bg-light', 'bg-blue', 'bg-checker');
         if (activeBg !== 'dark') modalPreview.classList.add(`bg-${activeBg}`);
         applyColorToPreview();
       });
@@ -682,17 +886,40 @@
       saveBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Saving…';
       saveBtn.disabled = true;
       try {
-        const res  = await fetch('/api/download', {
-          method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({ icon_id: currentIconId, customizations })
-        });
-        const data = await res.json();
-        if (data.success) {
-          closeModal();
-          showToast(`Saved <br/> <small style="opacity:0.75">${data.fileName}</small>`);
+        if (isBatchMode) {
+          const ids = Array.from(selectedIcons.keys());
+          const res = await fetch('/api/batch-generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ icon_ids: ids, customizations })
+          });
+          const data = await res.json();
+          if (data.success) {
+            closeModal();
+            clearSelection();
+            if (data.failed && data.failed.length > 0) {
+              const msg = `Saved ${data.written.length} icons.<br><small style="color:#f87171">${data.failed.length} failed.</small>`;
+              showToast(msg);
+            } else {
+              const ext = currentLang === 'js' ? 'js' : 'ts';
+              showToast(`Saved ${data.written.length} icons! <br/> <small style="opacity:0.75">(+ index.${ext} updated)</small>`);
+            }
+          } else {
+            showToast(`<span style="color:#f87171">Error: ${data.error}</span>`);
+          }
         } else {
-          showToast(`<span style="color:#f87171">Error: ${data.error}</span>`);
+          const res  = await fetch('/api/download', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ icon_id: currentIconId, customizations })
+          });
+          const data = await res.json();
+          if (data.success) {
+            closeModal();
+            showToast(`Saved <br/> <small style="opacity:0.75">${data.fileName}</small>`);
+          } else {
+            showToast(`<span style="color:#f87171">Error: ${data.error}</span>`);
+          }
         }
       } catch (err) {
         showToast(`<span style="color:#f87171">Network error</span>`);

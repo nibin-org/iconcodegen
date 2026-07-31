@@ -708,6 +708,7 @@
       align-items: center;
       gap: 0.6rem;
       max-width: 300px;
+      pointer-events: none;
     }
 
     #toast .toast-dot {
@@ -721,6 +722,7 @@
     #toast.show {
       transform: translateY(0) scale(1);
       opacity: 1;
+      pointer-events: auto;
     }
 
     /* ═══════════════════════════════════════════════════════
@@ -883,6 +885,66 @@
       background-size: 16px 16px;
       background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
       background-color: #0f172a;
+    }
+    /* Batch Mode Preview Grid */
+    .modal-preview.batch-mode {
+      display: flex;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      justify-content: flex-start;
+      gap: 1rem;
+      padding: 1.5rem;
+      padding-bottom: 4rem;
+      overflow-y: auto;
+    }
+
+    .batch-preview-item {
+      position: relative;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      padding: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .batch-preview-item:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .batch-remove-btn {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--bg-elevated);
+      border: 1px solid var(--glass-border);
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.2s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .batch-preview-item:hover .batch-remove-btn {
+      opacity: 1;
+    }
+
+    .batch-remove-btn:hover {
+      background: var(--brand-purple);
+      color: white;
+      border-color: transparent;
     }
 
     .bg-switcher-overlay {

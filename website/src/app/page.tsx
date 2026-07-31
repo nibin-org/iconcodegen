@@ -97,7 +97,7 @@ export default function Home() {
         <section className="relative z-10 text-center px-6 pt-24 pb-32 max-w-5xl mx-auto">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand-purple/30 bg-brand-purple/10 text-brand-cyan text-xs font-bold tracking-widest uppercase mb-10 backdrop-blur-md">
             <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
-            v1.1.2 — Now with Infinite Scroll & Sidebar Filters
+            v2.1.0 — Now with Batch Export Drawer & Production Generators
           </div>
 
           <h1 className="text-5xl md:text-[80px] font-black tracking-tight mb-8 leading-[1.05]">

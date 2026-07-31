@@ -49,6 +49,7 @@ npx iconcodegen
 ## Features
 
 ### The Local Dashboard
+- **Batch export drawer:** select multiple icons and customize or export them all at once via a sleek slide-out drawer
 - **Infinite scroll:** browse thousands of results without pagination
 - **Live customization panel:** fine-tune stroke width, size (`24px`, `32px`, etc.), and hex color with a built-in color picker
 - **Contextual previews:** check an icon against both dark and light backgrounds before generating code
@@ -56,6 +57,8 @@ npx iconcodegen
 
 ### Code Generation
 - **Strictly typed output:** generates `.tsx` fully typed with `React.SVGProps<SVGSVGElement>` — no `any`
+- **Barrel file automation:** automatically generates and updates an `index.ts` (or `.js`) file to cleanly export all your icons from one place
+- **Enterprise ready:** generated files include linter overrides (`/* eslint-disable */`) to cleanly bypass strict CI environments
 - **JS & TS support:** outputs `.jsx` or `.tsx`
 - **Component style:** choose arrow function (`const Icon = () =>`) or standard function (`function Icon()`)
 - **Zero runtime dependencies:** generates raw `<svg>` components — no bundled icon font libraries

@@ -9,6 +9,10 @@ describe('React Component Generator', () => {
     
     // Check TS typings
     expect(result).toContain('React.SVGProps<SVGSVGElement>');
+    // Check linter overrides
+    expect(result).toContain('/* eslint-disable */');
+    expect(result).toContain('// @ts-nocheck');
+    expect(result).toContain('// THIS FILE IS AUTO-GENERATED');
     // Check function style
     expect(result).toContain('export function ActivityIcon(');
     // Check default injected props

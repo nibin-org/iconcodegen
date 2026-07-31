@@ -67,7 +67,7 @@ if (args[0] === 'init') {
   // Serve public folder
   app.use(express.static(path.join(projectRoot, 'public')));
 
-  async function fetchAndGenerateCode(icon_id, customizations) {
+  async function fetchAndGenerateCode(icon_id, customizations, overrideIconName = null) {
     if (!icon_id) throw new Error('icon_id is required');
 
     const [prefix, name] = icon_id.split(':');
@@ -79,13 +79,13 @@ if (args[0] === 'init') {
 
     const baseName = name.replace(/[^a-zA-Z0-9]+(.)/g, (m, chr) => chr.toUpperCase())
                         .replace(/^([a-z])/, (m, chr) => chr.toUpperCase());
-    const iconName = `${baseName}Icon`;
+    const iconName = overrideIconName || `${baseName}Icon`;
     const ext = customizations.language === 'js' ? 'jsx' : 'tsx';
     const fileName = `${iconName}.${ext}`;
 
     const componentCode = await generateReactIcon(iconName, svgContent, customizations || {});
 
-    return { componentCode, fileName };
+    return { componentCode, fileName, iconName };
   }
 
   const requireLocalOrigin = (req, res, next) => {
@@ -103,10 +103,37 @@ if (args[0] === 'init') {
     next();
   };
 
+  function updateIndexFile(targetPath, newExports, customizations) {
+    if (!newExports || newExports.length === 0) return;
+    const ext = customizations?.language === 'js' ? 'js' : 'ts';
+    const indexPath = path.join(targetPath, `index.${ext}`);
+    let indexContent = '';
+    if (fs.existsSync(indexPath)) {
+      indexContent = fs.readFileSync(indexPath, 'utf-8');
+    }
+    
+    let updated = false;
+    for (const { iconName, fileName } of newExports) {
+      const baseNameExt = fileName.replace(/\.[jt]sx?$/, '');
+      const exportStatement = `export { ${iconName} } from './${baseNameExt}';`;
+      if (!indexContent.includes(`{ ${iconName} }`)) {
+        if (indexContent && !indexContent.endsWith('\n')) {
+          indexContent += '\n';
+        }
+        indexContent += exportStatement + '\n';
+        updated = true;
+      }
+    }
+    
+    if (updated) {
+      fs.writeFileSync(indexPath, indexContent, 'utf-8');
+    }
+  }
+
   app.post('/api/download', requireLocalOrigin, async (req, res) => {
     try {
       const { icon_id, customizations } = req.body;
-      const { componentCode, fileName } = await fetchAndGenerateCode(icon_id, customizations);
+      const { componentCode, fileName, iconName } = await fetchAndGenerateCode(icon_id, customizations);
 
       if (!fs.existsSync(savePath)) {
         fs.mkdirSync(savePath, { recursive: true });
@@ -114,6 +141,8 @@ if (args[0] === 'init') {
 
       const filePath = path.join(savePath, fileName);
       fs.writeFileSync(filePath, componentCode, 'utf-8');
+
+      updateIndexFile(savePath, [{ iconName, fileName }], customizations);
 
       res.json({ success: true, message: `Saved ${fileName}`, fileName, filePath });
     } catch (err) {
@@ -133,6 +162,65 @@ if (args[0] === 'init') {
       console.error(err);
       const status = err.message.includes('required') ? 400 : (err.message.includes('not found') ? 404 : 500);
       res.status(status).json({ error: err.message });
+    }
+  });
+
+  app.post('/api/batch-generate', requireLocalOrigin, async (req, res) => {
+    try {
+      const { icon_ids, customizations } = req.body;
+      if (!Array.isArray(icon_ids) || icon_ids.length === 0) {
+        return res.status(400).json({ error: 'icon_ids must be a non-empty array' });
+      }
+
+      const map = [];
+      const nameCounts = {};
+      for (const id of icon_ids) {
+        if (!id || typeof id !== 'string') continue;
+        const parts = id.split(':');
+        const prefix = parts.length > 1 ? parts[0] : '';
+        const name = parts.length > 1 ? parts[1] : id;
+        
+        const baseName = name.replace(/[^a-zA-Z0-9]+(.)/g, (m, chr) => chr.toUpperCase())
+                            .replace(/^([a-z])/, (m, chr) => chr.toUpperCase());
+        const defaultName = `${baseName}Icon`;
+        map.push({ id, prefix, baseName, defaultName, finalName: defaultName });
+        nameCounts[defaultName] = (nameCounts[defaultName] || 0) + 1;
+      }
+      
+      for (const item of map) {
+        if (nameCounts[item.defaultName] > 1 && item.prefix) {
+           const prefixCap = item.prefix.replace(/[^a-zA-Z0-9]+(.)/g, (m, c) => c.toUpperCase())
+                                        .replace(/^([a-z])/, (m, c) => c.toUpperCase());
+           item.finalName = `${item.baseName}${prefixCap}Icon`;
+        }
+      }
+
+      if (!fs.existsSync(savePath)) {
+        fs.mkdirSync(savePath, { recursive: true });
+      }
+
+      const written = [];
+      const failed = [];
+      const newExports = [];
+
+      for (const item of map) {
+        try {
+          const { componentCode, fileName, iconName } = await fetchAndGenerateCode(item.id, customizations, item.finalName);
+          const filePath = path.join(savePath, fileName);
+          fs.writeFileSync(filePath, componentCode, 'utf-8');
+          written.push(item.id);
+          newExports.push({ iconName, fileName });
+        } catch (err) {
+          failed.push({ id: item.id, error: err.message });
+        }
+      }
+
+      updateIndexFile(savePath, newExports, customizations);
+
+      res.json({ success: true, written, failed });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: err.message });
     }
   });
 

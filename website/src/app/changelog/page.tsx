@@ -2,9 +2,35 @@ import { Navbar } from "@/components/Navbar";
 
 const releases = [
   {
+    version: "2.1.0",
+    date: "July 31, 2026",
+    latest: true,
+    added: [
+      {
+        title: "Batch Export Drawer",
+        desc: "Introduced a beautifully animated, slide-out drawer for batch exporting icons. Features a new flexbox grid layout, smooth glassmorphism hover effects, and persistent export settings.",
+      },
+      {
+        title: "Production React Generators",
+        desc: "Generated React components now automatically include global overrides (/* eslint-disable */, // @ts-nocheck) and DO NOT EDIT warnings to seamlessly bypass strict enterprise linting rules.",
+      },
+      {
+        title: "Barrel File Automation",
+        desc: "The CLI now automatically generates and updates index.ts / index.js barrel files across both Single and Batch export workflows.",
+      }
+    ],
+    changed: [],
+    fixed: [
+      {
+        title: "UI & UX Polish",
+        desc: "Fixed multiple layout edge cases including double-scrollbars on small screens, CSS transition flickering between modals, and toast notifications blocking clicks.",
+      }
+    ],
+  },
+  {
     version: "2.0.0",
     date: "July 21, 2026",
-    latest: true,
+    latest: false,
     added: [
       {
         title: "Package Rename",

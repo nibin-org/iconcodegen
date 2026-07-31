@@ -21,6 +21,9 @@ export async function generateReactIcon(iconName, svgContent, customizations = {
   const template = (variables, { tpl }) => {
     if (isArrow) {
       return tpl`
+/* eslint-disable */
+// @ts-nocheck
+// THIS FILE IS AUTO-GENERATED. DO NOT EDIT IT MANUALLY.
 import * as React from "react";
 
 export const ${variables.componentName} = (props) => {
@@ -31,6 +34,9 @@ export const ${variables.componentName} = (props) => {
 `;
     } else {
       return tpl`
+/* eslint-disable */
+// @ts-nocheck
+// THIS FILE IS AUTO-GENERATED. DO NOT EDIT IT MANUALLY.
 import * as React from "react";
 
 export function ${variables.componentName}(props) {

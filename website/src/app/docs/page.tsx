@@ -138,7 +138,8 @@ export default function DocsPage() {
                 <li className="flex gap-3"><span className="text-brand-cyan shrink-0">→</span><span><strong className="text-white">Sidebar Filters:</strong> Filter by icon pack (e.g. `lucide`, `heroicons`) and style (e.g. `line`, `solid`).</span></li>
                 <li className="flex gap-3"><span className="text-brand-cyan shrink-0">→</span><span><strong className="text-white">Infinite Scroll:</strong> Icons load in batches using IntersectionObserver — no pagination.</span></li>
                 <li className="flex gap-3"><span className="text-brand-cyan shrink-0">→</span><span><strong className="text-white">Customization Panel:</strong> Click any icon to configure color, size, language (TS/JS), and export style (Arrow / Standard function).</span></li>
-                <li className="flex gap-3"><span className="text-brand-cyan shrink-0">→</span><span><strong className="text-white">One-click Save:</strong> Downloads the generated `.tsx` or `.jsx` component directly into your configured `savePath`.</span></li>
+                <li className="flex gap-3"><span className="text-brand-cyan shrink-0">→</span><span><strong className="text-white">Batch Export:</strong> Click the checkmark on multiple icons to open the slide-out Batch Drawer. Customize and export all selected icons simultaneously.</span></li>
+                <li className="flex gap-3"><span className="text-brand-cyan shrink-0">→</span><span><strong className="text-white">One-click Save:</strong> Downloads the generated `.tsx` or `.jsx` component directly into your configured `savePath`, and automatically updates your `index.ts` barrel file.</span></li>
               </ul>
             </Section>
 
@@ -186,7 +187,11 @@ export default function DocsPage() {
               <p>
                 When you save an icon, iconcodegen generates a clean, production-ready React component. Here is an example of the TypeScript output for a Lucide arrow icon:
               </p>
-              <CodeBlock code={`import * as React from "react";
+              <CodeBlock code={`/* eslint-disable */
+// @ts-nocheck
+// THIS FILE IS AUTO-GENERATED
+
+import * as React from "react";
 
 export function ArrowRightIcon({
   width = 24,
@@ -209,6 +214,8 @@ export function ArrowRightIcon({
                 <li>Strips hardcoded `width` and `height` from the SVG source, replacing them with dynamic props</li>
                 <li>Removes any existing `color` attributes to avoid conflicts with the React `color` prop</li>
                 <li>Injects <code className="text-slate-200 bg-white/5 px-1 rounded text-xs">{"{"}"...props{"}"}</code> spread for full composability</li>
+                <li>Includes global linter overrides to bypass strict CI checks on generated code</li>
+                <li>Automatically updates an `index.ts` (or `index.js`) barrel file in the save folder so you can import all icons from a single path</li>
               </ul>
             </Section>
 
@@ -249,6 +256,7 @@ export function ArrowRightIcon({
                   { method: "GET", path: "/api/filters", desc: "Returns available `packs` and `styles` for the active provider." },
                   { method: "GET", path: "/api/config", desc: "Returns the active provider name: `{ provider: string }`." },
                   { method: "POST", path: "/api/download", desc: "Generates and writes a React component file to disk. Body: `{ icon_id, customizations }`." },
+                  { method: "POST", path: "/api/batch-generate", desc: "Generates multiple components and updates the barrel file. Body: `{ icons, customizations }`." },
                   { method: "POST", path: "/api/generate-snippet", desc: "Generates and returns a React component as a string without saving. Body: `{ icon_id, customizations }`." },
                 ].map((ep) => (
                   <div key={ep.path} className="glass-panel rounded-xl p-5 flex flex-col sm:flex-row gap-3 sm:items-start">

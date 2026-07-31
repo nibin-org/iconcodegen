@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-07-31
+### Added
+- **Batch Export Drawer**: Introduced a beautifully animated, slide-out drawer for batch exporting icons. Features a new flexbox grid layout, smooth glassmorphism hover effects, and persistent export settings.
+- **Production React Generators**: Generated React components now automatically include global overrides (`/* eslint-disable */`, `// @ts-nocheck`) and "DO NOT EDIT" warnings to seamlessly bypass strict enterprise linting rules.
+- **Barrel File Automation**: The CLI now automatically generates and updates `index.ts` / `index.js` barrel files across both Single and Batch export workflows to keep your codebase organized.
+
+### Fixed
+- **UI & UX Polish**: Fixed multiple layout edge cases including double-scrollbars on small screens, CSS transition flickering when switching between modals, and toast notifications blocking clicks.
+
 ## [2.0.1] - 2026-07-21
 ### Changed
 - Refactored `README.md` design for better aesthetics on the npm registry and added an animated demo GIF.
