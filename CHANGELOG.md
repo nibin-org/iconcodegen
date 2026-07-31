@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.1] - 2026-07-31
+### Fixed
+- **Security**: Hardened the local API server's CSRF protection by shifting from a fail-open to a fail-closed architecture. The `/api/download` and `/api/batch-generate` endpoints now explicitly reject requests that omit `Origin` or `Referer` headers.
+
 ## [2.1.0] - 2026-07-31
 ### Added
 - **Batch Export Drawer**: Introduced a beautifully animated, slide-out drawer for batch exporting icons. Features a new flexbox grid layout, smooth glassmorphism hover effects, and persistent export settings.

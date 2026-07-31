@@ -90,15 +90,16 @@ if (args[0] === 'init') {
 
   const requireLocalOrigin = (req, res, next) => {
     const origin = req.headers.origin || req.headers.referer;
-    if (origin) {
-      try {
-        const url = new URL(origin);
-        if (url.hostname !== '127.0.0.1') {
-          return res.status(403).json({ error: 'Forbidden: Invalid origin' });
-        }
-      } catch (err) {
-        return res.status(403).json({ error: 'Forbidden: Invalid origin URL' });
+    if (!origin) {
+      return res.status(403).json({ error: 'Forbidden: Missing origin' });
+    }
+    try {
+      const url = new URL(origin);
+      if (url.hostname !== '127.0.0.1') {
+        return res.status(403).json({ error: 'Forbidden: Invalid origin' });
       }
+    } catch (err) {
+      return res.status(403).json({ error: 'Forbidden: Invalid origin URL' });
     }
     next();
   };

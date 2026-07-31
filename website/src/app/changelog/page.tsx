@@ -2,9 +2,22 @@ import { Navbar } from "@/components/Navbar";
 
 const releases = [
   {
-    version: "2.1.0",
+    version: "2.1.1",
     date: "July 31, 2026",
     latest: true,
+    added: [],
+    changed: [],
+    fixed: [
+      {
+        title: "Security",
+        desc: "Hardened the local API server's CSRF protection by shifting from a fail-open to a fail-closed architecture. The /api/download and /api/batch-generate endpoints now explicitly reject requests that omit Origin or Referer headers.",
+      }
+    ],
+  },
+  {
+    version: "2.1.0",
+    date: "July 31, 2026",
+    latest: false,
     added: [
       {
         title: "Batch Export Drawer",
