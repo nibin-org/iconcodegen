@@ -132,6 +132,10 @@ export default function DocsPage() {
               <CodeBlock code={`🚀 iconcodegen is running at http://localhost:3000\nSaving icons to: ./src/components/icons`} lang="bash" />
               <Note>The dashboard is fully local. Nothing you do is sent to any external server (unless you are using the Iconify provider, which fetches SVGs from the public Iconify CDN on demand).</Note>
 
+              <h3 className="text-white font-bold text-lg mt-8 mb-3">Barrel File Cleanup</h3>
+              <p>If you manually delete an icon file from your project, you will be left with a dead export in your `index.ts` file that breaks your build. To automatically clean this up, run:</p>
+              <CodeBlock code={`npx iconcodegen prune\n# Or to preview what will be deleted:\nnpx iconcodegen prune --dry-run`} lang="bash" />
+
               <h3 className="text-white font-bold text-lg mt-8 mb-3">Dashboard Features</h3>
               <ul className="space-y-3 text-sm">
                 <li className="flex gap-3"><span className="text-brand-cyan shrink-0">→</span><span><strong className="text-white">Search:</strong> Debounced real-time search across all icons in the active provider.</span></li>

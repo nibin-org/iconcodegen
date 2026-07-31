@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-07-31
+### Added
+- **Prune Command**: Introduced `npx iconcodegen prune` to automatically clean up dangling exports in your `index.ts` barrel file when you manually delete or rename generated icon components. Supports a `--dry-run` flag to safely preview destructive changes.
+
 ## [2.2.0] - 2026-07-31
 ### Added
 - **Custom Naming Templates**: Added the `iconNamePattern` field to `iconcodegen.json`. You can now enforce strict team naming conventions (e.g. `{name}Icon`, `App{name}`, `{name}`) across both single and batch exports. All generated names are automatically validated and sanitized into compliant JavaScript identifiers.

@@ -2,9 +2,22 @@ import { Navbar } from "@/components/Navbar";
 
 const releases = [
   {
-    version: "2.2.0",
+    version: "2.3.0",
     date: "July 31, 2026",
     latest: true,
+    added: [
+      {
+        title: "Prune Command",
+        desc: "Introduced `npx iconcodegen prune` to automatically clean up dangling exports in your index.ts barrel file when you manually delete or rename generated icon components. Supports a `--dry-run` flag to safely preview destructive changes.",
+      }
+    ],
+    changed: [],
+    fixed: [],
+  },
+  {
+    version: "2.2.0",
+    date: "July 31, 2026",
+    latest: false,
     added: [
       {
         title: "Custom Naming Templates",

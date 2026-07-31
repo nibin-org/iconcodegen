@@ -80,6 +80,75 @@ if (args[0] === 'init') {
       rl.close();
     });
   });
+} else if (args[0] === 'prune') {
+  if (!fs.existsSync(CONFIG_FILE)) {
+    console.error('❌ Configuration not found. Please run `npx iconcodegen init` first.');
+    process.exit(1);
+  }
+  const config = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf-8'));
+  const savePath = path.resolve(cwd, config.savePath);
+  
+  const isDryRun = args.includes('--dry-run');
+  console.log(`🔍 Scanning ${config.savePath} for barrel files...`);
+  
+  let indexPath = null;
+  const indexExts = ['.ts', '.js', '.tsx', '.jsx'];
+  for (const ext of indexExts) {
+    const p = path.join(savePath, 'index' + ext);
+    if (fs.existsSync(p)) {
+      indexPath = p;
+      break;
+    }
+  }
+
+  if (!indexPath) {
+    console.log(`✨ No barrel file found in ${config.savePath}.`);
+    process.exit(0);
+  }
+
+  const indexContent = fs.readFileSync(indexPath, 'utf-8');
+  const lines = indexContent.split(/\r?\n/);
+  const newLines = [];
+  let prunedCount = 0;
+
+  const exportRegex = /^export\s+\{\s*([a-zA-Z0-9_$]+)\s*\}\s+from\s+['"]\.\/([^'"/]+)['"];?\s*$/;
+  const compExts = ['.tsx', '.jsx', '.ts', '.js'];
+
+  for (const line of lines) {
+    const match = exportRegex.exec(line);
+    if (match) {
+      const exportName = match[1];
+      const baseNameExt = match[2];
+      const baseFilePath = path.join(savePath, baseNameExt);
+      
+      let fileExists = false;
+      for (const ext of compExts) {
+        if (fs.existsSync(baseFilePath + ext)) {
+          fileExists = true;
+          break;
+        }
+      }
+
+      if (!fileExists) {
+        console.log(`🗑️  ${isDryRun ? '[DRY RUN] Would remove' : 'Removed'} dangling export: ${exportName} (file not found)`);
+        prunedCount++;
+        continue;
+      }
+    }
+    newLines.push(line);
+  }
+
+  if (prunedCount === 0) {
+    console.log(`✨ Barrel file is already clean. No dangling exports found.`);
+  } else {
+    if (!isDryRun) {
+      fs.writeFileSync(indexPath, newLines.join('\n'), 'utf-8');
+      console.log(`✅ Prune complete. Cleaned up ${prunedCount} missing export(s).`);
+    } else {
+      console.log(`✅ Dry run complete. Found ${prunedCount} missing export(s) to remove.`);
+    }
+  }
+  process.exit(0);
 } else {
   if (!fs.existsSync(CONFIG_FILE)) {
     console.error('❌ Configuration not found. Please run `npx iconcodegen init` first.');

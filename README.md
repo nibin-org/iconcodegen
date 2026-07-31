@@ -44,6 +44,13 @@ Then start the visual search dashboard:
 npx iconcodegen
 ```
 
+To clean up your barrel file after manually deleting icons:
+
+```bash
+npx iconcodegen prune
+npx iconcodegen prune --dry-run
+```
+
 ---
 
 ## Features
