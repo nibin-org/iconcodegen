@@ -95,10 +95,13 @@ export default function Home() {
 
         {/* ── HERO ── */}
         <section className="relative z-10 text-center px-6 pt-24 pb-32 max-w-5xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand-purple/30 bg-brand-purple/10 text-brand-cyan text-xs font-bold tracking-widest uppercase mb-10 backdrop-blur-md">
-            <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
-            v2.1.0 — Now with Batch Export Drawer & Production Generators
-          </div>
+          <Link href="/changelog" className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand-purple/30 bg-brand-purple/10 hover:bg-brand-purple/20 transition-colors text-brand-cyan text-xs font-bold tracking-widest uppercase mb-10 backdrop-blur-md group">
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+            </svg>
+            v2.4.0 — AST Dead-Code Detection
+            <span className="text-brand-purple group-hover:translate-x-0.5 transition-transform">→</span>
+          </Link>
 
           <h1 className="text-5xl md:text-[80px] font-black tracking-tight mb-8 leading-[1.05]">
             <span className="text-gradient">Beautiful icons,</span>
