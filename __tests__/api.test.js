@@ -46,4 +46,30 @@ describe('CSRF Origin Middleware (Fail-Closed)', () => {
     expect(res.status).not.toHaveBeenCalled();
     expect(res.json).not.toHaveBeenCalled();
   });
+
+  it('should call next() successfully for valid hostname "localhost"', () => {
+    const req = { headers: { origin: 'http://localhost:3000' } };
+    const res = { status: vi.fn().mockReturnThis(), json: vi.fn() };
+    const next = vi.fn();
+    requireLocalOrigin(req, res, next);
+    expect(next).toHaveBeenCalledOnce();
+  });
+
+  it('should call next() successfully for valid IPv6 loopback "[::1]"', () => {
+    const req = { headers: { origin: 'http://[::1]:8080' } };
+    const res = { status: vi.fn().mockReturnThis(), json: vi.fn() };
+    const next = vi.fn();
+    requireLocalOrigin(req, res, next);
+    expect(next).toHaveBeenCalledOnce();
+  });
+
+  it('should explicitly reject requests with a lookalike malicious Origin (e.g., localhost.evil.com) (403)', () => {
+    const req = { headers: { origin: 'http://localhost.evil.com:3000' } };
+    const res = { status: vi.fn().mockReturnThis(), json: vi.fn() };
+    const next = vi.fn();
+    requireLocalOrigin(req, res, next);
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Forbidden: Invalid origin' });
+    expect(next).not.toHaveBeenCalled();
+  });
 });

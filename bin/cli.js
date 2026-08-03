@@ -18,7 +18,8 @@ export const requireLocalOrigin = (req, res, next) => {
   }
   try {
     const url = new URL(origin);
-    if (url.hostname !== '127.0.0.1') {
+    const allowedHosts = ['127.0.0.1', 'localhost', '[::1]'];
+    if (!allowedHosts.includes(url.hostname)) {
       return res.status(403).json({ error: 'Forbidden: Invalid origin' });
     }
   } catch (err) {
