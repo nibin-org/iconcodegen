@@ -2,9 +2,22 @@ import { Navbar } from "@/components/Navbar";
 
 const releases = [
   {
-    version: "2.5.1",
+    version: "2.5.2",
     date: "August 3, 2026",
     latest: true,
+    added: [],
+    changed: [],
+    fixed: [
+      {
+        title: "Circular Dependency",
+        desc: "Fixed an innocuous Node.js warning about an unsettled top-level await by embedding the sync naming logic directly into the sync script instead of dynamically importing it from the CLI runner.",
+      }
+    ],
+  },
+  {
+    version: "2.5.1",
+    date: "August 3, 2026",
+    latest: false,
     added: [],
     changed: [],
     fixed: [
