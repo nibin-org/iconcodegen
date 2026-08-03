@@ -23,7 +23,7 @@ const features = [
     color: "text-brand-cyan",
     bg: "bg-brand-cyan/10",
     title: "Strictly-Typed React",
-    desc: "One click generates a fully typed `.tsx` component with `React.SVGProps<SVGSVGElement>` — ready to paste directly into your codebase.",
+    desc: <>One click generates a fully typed <code className="bg-white/10 px-1 rounded text-slate-300 text-xs font-mono">.tsx</code> component with <code className="bg-white/10 px-1 rounded text-slate-300 text-xs font-mono">React.SVGProps&lt;SVGSVGElement&gt;</code> — ready to paste directly into your codebase.</>,
   },
   {
     icon: (
@@ -44,8 +44,8 @@ const features = [
     ),
     color: "text-emerald-400",
     bg: "bg-emerald-500/10",
-    title: "Zero Config",
-    desc: "Run `npx iconcodegen init` once to set your save path and provider. After that, a single command opens the full dashboard every time.",
+    title: "Powerful CLI Tooling",
+    desc: <>Maintain your library safely with built-in commands. Run <code className="bg-white/10 px-1 rounded text-slate-300 text-xs font-mono">audit</code> to find unused icons, <code className="bg-white/10 px-1 rounded text-slate-300 text-xs font-mono">prune</code> to clean up your barrel file, and <code className="bg-white/10 px-1 rounded text-slate-300 text-xs font-mono">sync</code> to mass-rename components.</>,
   },
   {
     icon: (
