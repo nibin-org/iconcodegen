@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { resolveIconName } from '../bin/cli.js';
+import { resolveIconName } from '../bin/naming.js';
 
 describe('resolveIconName', () => {
   it('should default to {name}Icon if pattern is not provided', () => {

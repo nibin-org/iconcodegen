@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.3] - 2026-08-03
+### Changed
+- **Internal Refactor**: Extracted `resolveIconName` and `validateIconNamePattern` out of CLI/Sync scripts into a shared `naming.js` module. No changes to public API or behavior.
+
 ## [2.5.2] - 2026-08-03
 ### Fixed
 - **Circular Dependency**: Fixed an innocuous Node.js warning about an unsettled top-level await by embedding the sync naming logic directly into the sync script instead of dynamically importing it from the CLI runner.

@@ -7,20 +7,7 @@ import generateModule from '@babel/generator';
 const traverse = traverseModule.default || traverseModule;
 const generate = generateModule.default || generateModule;
 
-function resolveIconName(baseName, pattern = "{name}Icon") {
-  if (typeof pattern !== 'string') pattern = "{name}Icon";
-  let rawName = pattern.replaceAll("{name}", baseName);
-  const parts = rawName.split(/[^a-zA-Z0-9]+/);
-  const pascalParts = parts.map(part => {
-    if (!part) return "";
-    return part.charAt(0).toUpperCase() + part.slice(1);
-  });
-  let finalName = pascalParts.join("");
-  if (/^[0-9]/.test(finalName)) {
-    finalName = "Icon" + finalName;
-  }
-  return finalName;
-}
+import { resolveIconName } from './naming.js';
 
 // Ensure the first letter is capitalized
 function capitalize(str) {

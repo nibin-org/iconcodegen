@@ -2,9 +2,22 @@ import { Navbar } from "@/components/Navbar";
 
 const releases = [
   {
-    version: "2.5.2",
+    version: "2.5.3",
     date: "August 3, 2026",
     latest: true,
+    added: [],
+    changed: [
+      {
+        title: "Internal Refactor",
+        desc: "Extracted resolveIconName and validateIconNamePattern out of CLI/Sync scripts into a shared naming.js module. No changes to public API or behavior.",
+      }
+    ],
+    fixed: [],
+  },
+  {
+    version: "2.5.2",
+    date: "August 3, 2026",
+    latest: false,
     added: [],
     changed: [],
     fixed: [
