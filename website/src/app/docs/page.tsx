@@ -142,6 +142,11 @@ export default function DocsPage() {
               <Note>The audit command is read-only. It uses strict AST analysis (not regex) to find dead code and will output `rm` commands for you to review and run manually.</Note>
               <p className="text-sm mt-3 text-slate-400"><strong>Note:</strong> The scanner relies on the name of your target folder (e.g., <code className="bg-white/10 px-1 rounded">icons</code>) to identify imports. Path aliases that do not include the folder name (e.g. <code className="bg-white/10 px-1 rounded">@/ui/svg-pack</code>) will be missed.</p>
 
+              <h3 className="text-white font-bold text-lg mt-8 mb-3">Mass Renaming (Sync)</h3>
+              <p>If you change your <code className="text-slate-300">iconNamePattern</code> in the configuration file, your existing icons will not automatically update. To safely retroactively rename all your generated icons to match the new pattern, run:</p>
+              <CodeBlock code={`npx iconcodegen sync\n# Or to safely preview the renames:\nnpx iconcodegen sync --dry-run`} lang="bash" />
+              <Note>The sync engine is completely AST-driven. It groups files by their injected metadata (ignoring your manual file renames), gracefully handles collisions and duplicates, and performs a surgical string-replacement on your `index.ts` to preserve your code formatting and comments.</Note>
+
               <h3 className="text-white font-bold text-lg mt-8 mb-3">Dashboard Features</h3>
               <ul className="space-y-3 text-sm">
                 <li className="flex gap-3"><span className="text-brand-cyan shrink-0">→</span><span><strong className="text-white">Search:</strong> Debounced real-time search across all icons in the active provider.</span></li>

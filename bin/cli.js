@@ -163,6 +163,16 @@ if (args[0] === 'init') {
   
   const { runAudit } = await import('./audit.js');
   runAudit(config, cwd, isDryRun, targetDir);
+} else if (args[0] === 'sync') {
+  if (!fs.existsSync(CONFIG_FILE)) {
+    console.error('❌ Configuration not found. Please run `npx iconcodegen init` first.');
+    process.exit(1);
+  }
+  const config = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf-8'));
+  const isDryRun = args.includes('--dry-run');
+  
+  const { runSync } = await import('./sync.js');
+  runSync(config, cwd, isDryRun);
 } else {
   if (!fs.existsSync(CONFIG_FILE)) {
     console.error('❌ Configuration not found. Please run `npx iconcodegen init` first.');

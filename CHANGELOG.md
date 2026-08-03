@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2026-08-03
+### Added
+- **`iconcodegen sync` Command**: A powerful new CLI command to automatically mass-rename all generated icons to conform to your `iconNamePattern` in `iconcodegen.json`.
+  - **Identity Resolution**: Groups and deduplicates icons based on their internal metadata tags, not their filenames.
+  - **Surgical Barrel Updates**: Uses AST-informed surgical string replacement to update your `index.ts` file without destroying comments, quotes, or manual formatting.
+  - **Zero-Breakage Guarantee**: Safely aborts renames if collisions are detected, if the icon has been manually tampered with, or if you've manually aliased the export in your barrel file.
+
 ## [2.4.2] - 2026-08-03
 ### Added
 - **Metadata Injection**: The generator now unconditionally injects an `@iconcodegen-source` tracking comment into all generated icons. This preserves the original provider and icon identity for future automation workflows.

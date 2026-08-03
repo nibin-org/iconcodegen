@@ -58,6 +58,13 @@ npx iconcodegen audit
 npx iconcodegen audit --target ./app
 ```
 
+To retroactively mass-rename all your downloaded icons to match `iconNamePattern`:
+
+```bash
+npx iconcodegen sync
+npx iconcodegen sync --dry-run
+```
+
 ---
 
 ## Features

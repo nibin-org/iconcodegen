@@ -2,9 +2,22 @@ import { Navbar } from "@/components/Navbar";
 
 const releases = [
   {
-    version: "2.4.2",
+    version: "2.5.0",
     date: "August 3, 2026",
     latest: true,
+    added: [
+      {
+        title: "iconcodegen sync Command",
+        desc: "A powerful new CLI command to automatically mass-rename all generated icons to conform to your iconNamePattern. It uses AST-informed surgical barrel updates and features a strict zero-breakage pre-flight check.",
+      }
+    ],
+    changed: [],
+    fixed: [],
+  },
+  {
+    version: "2.4.2",
+    date: "August 3, 2026",
+    latest: false,
     added: [
       {
         title: "Metadata Injection",
