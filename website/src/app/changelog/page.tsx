@@ -2,9 +2,27 @@ import { Navbar } from "@/components/Navbar";
 
 const releases = [
   {
-    version: "2.4.1",
+    version: "2.4.2",
     date: "August 3, 2026",
     latest: true,
+    added: [
+      {
+        title: "Metadata Injection",
+        desc: "The generator now unconditionally injects an `@iconcodegen-source` tracking comment into all generated icons. This preserves the original provider and icon identity for future automation workflows.",
+      }
+    ],
+    changed: [],
+    fixed: [
+      {
+        title: "CSRF Middleware",
+        desc: "Patched the local API server's strict requireLocalOrigin middleware to explicitly allow localhost and [::1] origins alongside 127.0.0.1, fixing 403 Forbidden errors for users on different local loopbacks.",
+      }
+    ],
+  },
+  {
+    version: "2.4.1",
+    date: "August 3, 2026",
+    latest: false,
     added: [
       {
         title: "Config Hot-Reloading",
