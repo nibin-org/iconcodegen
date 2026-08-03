@@ -2,9 +2,22 @@ import { Navbar } from "@/components/Navbar";
 
 const releases = [
   {
+    version: "2.4.0",
+    date: "August 3, 2026",
+    latest: true,
+    added: [
+      {
+        title: "Audit Command (AST Dead-Code Detection)",
+        desc: "Introduced `npx iconcodegen audit` to scan your codebase for orphaned icons. Uses safe `@babel/parser` AST analysis instead of regex, and implements hard bail-outs if wildcard or dynamic imports are detected. Strictly read-only.",
+      }
+    ],
+    changed: [],
+    fixed: [],
+  },
+  {
     version: "2.3.0",
     date: "July 31, 2026",
-    latest: true,
+    latest: false,
     added: [
       {
         title: "Prune Command",

@@ -8,6 +8,7 @@ import { exec } from 'child_process';
 import { generateReactIcon } from '../templates/react-icon.js';
 import { getProvider } from './providers.js';
 
+
 export let app;
 
 export const requireLocalOrigin = (req, res, next) => {
@@ -149,6 +150,18 @@ if (args[0] === 'init') {
     }
   }
   process.exit(0);
+} else if (args[0] === 'audit') {
+  if (!fs.existsSync(CONFIG_FILE)) {
+    console.error('❌ Configuration not found. Please run `npx iconcodegen init` first.');
+    process.exit(1);
+  }
+  const config = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf-8'));
+  const isDryRun = args.includes('--dry-run');
+  const targetDirIndex = args.indexOf('--target');
+  const targetDir = targetDirIndex > -1 ? args[targetDirIndex + 1] : './src';
+  
+  const { runAudit } = await import('./audit.js');
+  runAudit(config, cwd, isDryRun, targetDir);
 } else {
   if (!fs.existsSync(CONFIG_FILE)) {
     console.error('❌ Configuration not found. Please run `npx iconcodegen init` first.');

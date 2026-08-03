@@ -136,6 +136,12 @@ export default function DocsPage() {
               <p>If you manually delete an icon file from your project, you will be left with a dead export in your `index.ts` file that breaks your build. To automatically clean this up, run:</p>
               <CodeBlock code={`npx iconcodegen prune\n# Or to preview what will be deleted:\nnpx iconcodegen prune --dry-run`} lang="bash" />
 
+              <h3 className="text-white font-bold text-lg mt-8 mb-3">Find Unused Icons (Audit)</h3>
+              <p>Over time, you may download icons that you no longer use. To safely scan your codebase for orphaned icons, run:</p>
+              <CodeBlock code={`npx iconcodegen audit\n# Specify a different target directory to scan:\nnpx iconcodegen audit --target ./src/components`} lang="bash" />
+              <Note>The audit command is read-only. It uses strict AST analysis (not regex) to find dead code and will output `rm` commands for you to review and run manually.</Note>
+              <p className="text-sm mt-3 text-slate-400"><strong>Note:</strong> The scanner relies on the name of your target folder (e.g., <code className="bg-white/10 px-1 rounded">icons</code>) to identify imports. Path aliases that do not include the folder name (e.g. <code className="bg-white/10 px-1 rounded">@/ui/svg-pack</code>) will be missed.</p>
+
               <h3 className="text-white font-bold text-lg mt-8 mb-3">Dashboard Features</h3>
               <ul className="space-y-3 text-sm">
                 <li className="flex gap-3"><span className="text-brand-cyan shrink-0">→</span><span><strong className="text-white">Search:</strong> Debounced real-time search across all icons in the active provider.</span></li>

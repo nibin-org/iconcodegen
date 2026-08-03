@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2026-08-03
+### Added
+- **Audit Command**: Introduced `npx iconcodegen audit` to safely scan your codebase via AST analysis for orphaned icons that are no longer imported. Refuses to execute deletions automatically to prevent accidental data loss; strictly read-only output. 
+
 ## [2.3.0] - 2026-07-31
 ### Added
 - **Prune Command**: Introduced `npx iconcodegen prune` to automatically clean up dangling exports in your `index.ts` barrel file when you manually delete or rename generated icon components. Supports a `--dry-run` flag to safely preview destructive changes.

@@ -51,6 +51,13 @@ npx iconcodegen prune
 npx iconcodegen prune --dry-run
 ```
 
+To find unused icons in your project that can be safely deleted:
+
+```bash
+npx iconcodegen audit
+npx iconcodegen audit --target ./app
+```
+
 ---
 
 ## Features
