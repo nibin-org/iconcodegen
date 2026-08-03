@@ -168,17 +168,66 @@ if (args[0] === 'init') {
     process.exit(1);
   }
 
-  const config = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf-8'));
-  
-  if (config.iconNamePattern && typeof config.iconNamePattern === 'string' && !config.iconNamePattern.includes('{name}')) {
-    console.error(`❌ Invalid iconNamePattern in iconcodegen.json. The pattern must contain the "{name}" token.`);
-    process.exit(1);
+  function validateIconNamePattern(pattern) {
+    if (pattern && typeof pattern === 'string' && !pattern.includes('{name}')) {
+      throw new Error(`The pattern must contain the "{name}" token.`);
+    }
+    const testPattern = pattern || "{name}Icon";
+    const testResolved = resolveIconName("TestIcon", testPattern);
+    if (!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(testResolved)) {
+      throw new Error(`The pattern "${testPattern}" produces an invalid JavaScript identifier.`);
+    }
   }
 
-  const testResolved = resolveIconName("TestIcon", config.iconNamePattern);
-  if (!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(testResolved)) {
-    console.error(`❌ Invalid iconNamePattern in iconcodegen.json. The pattern "${config.iconNamePattern}" produces an invalid JavaScript identifier.`);
-    process.exit(1);
+  let currentConfig = null;
+  let configLastMtime = 0;
+
+  function getConfig() {
+    try {
+      const stats = fs.statSync(CONFIG_FILE);
+      if (stats.mtimeMs > configLastMtime) {
+        const raw = fs.readFileSync(CONFIG_FILE, 'utf-8');
+        const newConfig = JSON.parse(raw);
+
+        validateIconNamePattern(newConfig.iconNamePattern);
+
+        const isReload = currentConfig !== null;
+        currentConfig = newConfig;
+        configLastMtime = stats.mtimeMs;
+        
+        if (isReload) {
+          const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+          console.log(`\x1b[90m[${time}]\x1b[0m 🔄 Config hot-reloaded`);
+        }
+      }
+    } catch (err) {
+      if (!currentConfig) {
+        console.error(`❌ Invalid iconcodegen.json: ${err.message}`);
+        process.exit(1);
+      }
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      console.warn(`\x1b[90m[${time}]\x1b[0m ⚠️ Config reload failed (${err.message}). Using last known good config.`);
+      configLastMtime = fs.statSync(CONFIG_FILE).mtimeMs;
+    }
+    return currentConfig;
+  }
+
+  // Initial load to validate on startup
+  const config = getConfig();
+
+  // Actively watch the file so the terminal logs instantly on save (better DX)
+  try {
+    let watchTimeout;
+    fs.watchFile(CONFIG_FILE, { interval: 500 }, (curr, prev) => {
+      if (curr.mtimeMs > prev.mtimeMs) {
+        clearTimeout(watchTimeout);
+        watchTimeout = setTimeout(() => {
+          getConfig();
+        }, 150);
+      }
+    });
+  } catch (err) {
+    // Ignore watcher errors, fallback to the lazy check is already in place
   }
 
   const savePath = path.resolve(cwd, config.savePath);
@@ -209,7 +258,9 @@ if (args[0] === 'init') {
 
     const baseName = name.replace(/[^a-zA-Z0-9]+(.)/g, (m, chr) => chr.toUpperCase())
                         .replace(/^([a-z])/, (m, chr) => chr.toUpperCase());
-    const iconName = overrideIconName || resolveIconName(baseName, config.iconNamePattern);
+    
+    const currentConfig = getConfig();
+    const iconName = overrideIconName || resolveIconName(baseName, currentConfig.iconNamePattern);
     const ext = customizations.language === 'js' ? 'jsx' : 'tsx';
     const fileName = `${iconName}.${ext}`;
 
@@ -258,7 +309,6 @@ if (args[0] === 'init') {
       fs.writeFileSync(filePath, componentCode, 'utf-8');
 
       updateIndexFile(savePath, [{ iconName, fileName }], customizations);
-
       res.json({ success: true, message: `Saved ${fileName}`, fileName, filePath });
     } catch (err) {
       console.error(err);
@@ -289,6 +339,7 @@ if (args[0] === 'init') {
 
       const map = [];
       const nameCounts = {};
+      const currentConfig = getConfig();
       for (const id of icon_ids) {
         if (!id || typeof id !== 'string') continue;
         const parts = id.split(':');
@@ -297,7 +348,7 @@ if (args[0] === 'init') {
         
         const baseName = name.replace(/[^a-zA-Z0-9]+(.)/g, (m, chr) => chr.toUpperCase())
                             .replace(/^([a-z])/, (m, chr) => chr.toUpperCase());
-        const defaultName = resolveIconName(baseName, config.iconNamePattern);
+        const defaultName = resolveIconName(baseName, currentConfig.iconNamePattern);
         map.push({ id, prefix, baseName, defaultName, finalName: defaultName });
         nameCounts[defaultName] = (nameCounts[defaultName] || 0) + 1;
       }
@@ -306,7 +357,7 @@ if (args[0] === 'init') {
         if (nameCounts[item.defaultName] > 1 && item.prefix) {
            const prefixCap = item.prefix.replace(/[^a-zA-Z0-9]+(.)/g, (m, c) => c.toUpperCase())
                                         .replace(/^([a-z])/, (m, c) => c.toUpperCase());
-           item.finalName = resolveIconName(item.baseName + prefixCap, config.iconNamePattern);
+           item.finalName = resolveIconName(item.baseName + prefixCap, currentConfig.iconNamePattern);
         }
       }
 

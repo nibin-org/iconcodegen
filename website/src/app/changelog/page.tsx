@@ -2,9 +2,27 @@ import { Navbar } from "@/components/Navbar";
 
 const releases = [
   {
-    version: "2.4.0",
+    version: "2.4.1",
     date: "August 3, 2026",
     latest: true,
+    added: [
+      {
+        title: "Config Hot-Reloading",
+        desc: "Added an active file watcher that instantly hot-reloads iconcodegen.json when you save it in your editor. The terminal will automatically log the update without requiring a CLI restart.",
+      }
+    ],
+    changed: [],
+    fixed: [
+      {
+        title: "Batch Generation Stale Config",
+        desc: "Fixed an inconsistency where batch generating icons would still use the stale startup config instead of the hot-reloaded pattern.",
+      }
+    ],
+  },
+  {
+    version: "2.4.0",
+    date: "August 3, 2026",
+    latest: false,
     added: [
       {
         title: "Audit Command (AST Dead-Code Detection)",

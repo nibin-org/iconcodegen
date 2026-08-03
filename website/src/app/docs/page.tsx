@@ -260,6 +260,12 @@ export function ArrowRightIcon({
                   </tbody>
                 </table>
               </div>
+              <div className="mt-4 p-4 rounded-lg bg-brand-cyan/10 border border-brand-cyan/20">
+                <p className="text-sm text-brand-cyan flex items-start gap-2">
+                  <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                  <span><strong>Hot Reloading:</strong> You don't need to restart the CLI when modifying <code className="text-brand-cyan bg-brand-cyan/10 px-1 py-0.5 rounded">iconcodegen.json</code>. The server actively watches the file and instantly hot-reloads your changes.</span>
+                </p>
+              </div>
             </Section>
 
             <Section id="api" title="API Reference">

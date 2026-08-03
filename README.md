@@ -124,6 +124,8 @@ IconCodegen detects the premium package, indexes all 4,700+ icons into memory, a
 | `provider` | string | `iconify` | Active icon source (`iconify` or `untitled-ui`) |
 | `iconNamePattern` | string | `{name}Icon` | Enforces a strict component naming convention (e.g. `App{name}`, `{name}Icon`) |
 
+> **Tip:** You don't need to restart the CLI when modifying `iconcodegen.json`. The server actively watches the file and instantly hot-reloads your changes.
+
 ---
 
 ## Requirements

@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.1] - 2026-08-03
+### Added
+- **Config Hot-Reloading**: Added an active file watcher that instantly hot-reloads `iconcodegen.json` when you save it in your editor. The terminal will log `🔄 Config hot-reloaded` without requiring a CLI restart.
+
+### Fixed
+- Fixed an inconsistency where `/api/batch-generate` was still using stale startup configuration data.
+- De-duplicated config validation logic internally.
+
 ## [2.4.0] - 2026-08-03
 ### Added
 - **Audit Command**: Introduced `npx iconcodegen audit` to safely scan your codebase via AST analysis for orphaned icons that are no longer imported. Refuses to execute deletions automatically to prevent accidental data loss; strictly read-only output. 
