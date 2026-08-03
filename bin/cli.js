@@ -265,7 +265,12 @@ if (args[0] === 'init') {
     const ext = customizations.language === 'js' ? 'jsx' : 'tsx';
     const fileName = `${iconName}.${ext}`;
 
-    const componentCode = await generateReactIcon(iconName, svgContent, customizations || {});
+    const enrichedCustomizations = {
+      ...(customizations || {}),
+      iconcodegenSource: `${activeProvider.name}:${icon_id}`
+    };
+
+    const componentCode = await generateReactIcon(iconName, svgContent, enrichedCustomizations);
 
     return { componentCode, fileName, iconName };
   }

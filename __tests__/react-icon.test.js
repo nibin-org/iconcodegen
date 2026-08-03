@@ -24,6 +24,19 @@ describe('React Component Generator', () => {
     expect(result).toContain('className="feather feather-activity"');
   });
 
+  it('should inject @iconcodegen-source metadata when iconcodegenSource is present', async () => {
+    const result = await generateReactIcon('ActivityIcon', sampleSvg, {
+      iconcodegenSource: 'iconify:lucide:activity'
+    });
+    
+    expect(result.startsWith('// @iconcodegen-source: iconify:lucide:activity\n')).toBe(true);
+  });
+
+  it('should not inject metadata when iconcodegenSource is missing', async () => {
+    const result = await generateReactIcon('ActivityIcon', sampleSvg, {});
+    expect(result).not.toContain('@iconcodegen-source');
+  });
+
   it('should strip hardcoded width and height from the original SVG', async () => {
     const result = await generateReactIcon('ActivityIcon', sampleSvg);
     

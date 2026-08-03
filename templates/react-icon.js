@@ -69,5 +69,9 @@ export function ${variables.componentName}(props) {
   let finalCode = jsCode.replace(/export function (\w+)\(props\)/, 'export function $1(' + propsString + ')');
   finalCode = finalCode.replace(/export const (\w+) = \(?props\)? =>/, 'export const $1 = (' + propsString + ') =>');
 
+  if (customizations.iconcodegenSource) {
+    finalCode = `// @iconcodegen-source: ${customizations.iconcodegenSource}\n` + finalCode;
+  }
+
   return finalCode + '\n';
 }
