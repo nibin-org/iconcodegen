@@ -2,9 +2,22 @@ import { Navbar } from "@/components/Navbar";
 
 const releases = [
   {
-    version: "2.5.0",
+    version: "2.5.1",
     date: "August 3, 2026",
     latest: true,
+    added: [],
+    changed: [],
+    fixed: [
+      {
+        title: "Sync Case Formatting",
+        desc: "Fixed a bug where `iconcodegen sync` could generate camelCase component names instead of strict PascalCase components when the user configured a lowercase prefix in `iconNamePattern`. Lowercase component names caused React to treat them as native HTML tags, breaking Intellisense.",
+      }
+    ],
+  },
+  {
+    version: "2.5.0",
+    date: "August 3, 2026",
+    latest: false,
     added: [
       {
         title: "iconcodegen sync Command",

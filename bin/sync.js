@@ -3,14 +3,10 @@ import path from 'path';
 import { parse } from '@babel/parser';
 import traverseModule from '@babel/traverse';
 import generateModule from '@babel/generator';
+import { resolveIconName } from './cli.js';
 
 const traverse = traverseModule.default || traverseModule;
 const generate = generateModule.default || generateModule;
-
-function resolveIconName(baseName, pattern) {
-  if (!pattern) return `${baseName}Icon`;
-  return pattern.replace('{name}', baseName);
-}
 
 // Ensure the first letter is capitalized
 function capitalize(str) {
