@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useMemo } from "react";
 import { Navbar } from "@/components/Navbar";
 
 const releases = [
@@ -448,104 +451,194 @@ const tagStyles: Record<string, string> = {
   Fixed: "bg-amber-500/10 text-amber-400 border-amber-500/20",
 };
 
-type Entry = { title: string; desc: string };
+type Entry = { title: string; desc: string; type: "Added" | "Changed" | "Fixed" };
+type FilterType = "All" | "Added" | "Changed" | "Fixed";
 
-function ChangeGroup({ label, entries }: { label: string; entries: Entry[] }) {
-  if (!entries.length) return null;
+function InlineEntry({ entry }: { entry: Entry }) {
   return (
-    <div className="mb-6">
-      <span className={`inline-block text-xs font-bold px-2.5 py-1 rounded-md border mb-4 uppercase tracking-widest ${tagStyles[label]}`}>
-        {label}
-      </span>
-      <ul className="space-y-4">
-        {entries.map((e) => (
-          <li key={e.title} className="flex gap-3">
-            <span className="mt-1.5 w-1 h-1 rounded-full bg-white/20 shrink-0" />
-            <div>
-              <span className="font-semibold text-white text-sm">{e.title} — </span>
-              <span className="text-sm text-slate-400">{e.desc}</span>
-            </div>
-          </li>
-        ))}
-      </ul>
+    <div className="flex items-start gap-4 mb-4 last:mb-0 group/entry">
+      <div className={`mt-1 text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-widest shrink-0 w-[72px] text-center ${tagStyles[entry.type]}`}>
+        {entry.type}
+      </div>
+      <div>
+        <span className="font-semibold text-white text-sm group-hover/entry:text-brand-cyan transition-colors">{entry.title} — </span>
+        <span className="text-sm text-slate-400 leading-relaxed">{entry.desc}</span>
+      </div>
     </div>
   );
 }
 
 export default function ChangelogPage() {
+  const [filter, setFilter] = useState<FilterType>("All");
+
+  const stats = useMemo(() => {
+    return {
+      total: releases.length,
+      features: releases.reduce((acc, r) => acc + r.added.length, 0),
+      fixes: releases.reduce((acc, r) => acc + r.fixed.length, 0),
+    };
+  }, []);
+
+  const latestRelease = releases[0];
+  const olderReleases = releases.slice(1);
+
+  const getAllEntries = (release: typeof releases[0]) => {
+    return [
+      ...release.added.map((e) => ({ ...e, type: "Added" as const })),
+      ...release.changed.map((e) => ({ ...e, type: "Changed" as const })),
+      ...release.fixed.map((e) => ({ ...e, type: "Fixed" as const })),
+    ];
+  };
+
+  const getFilteredEntries = (release: typeof releases[0]) => {
+    const allEntries = getAllEntries(release);
+    if (filter === "All") return allEntries;
+    return allEntries.filter((e) => e.type === filter);
+  };
+
   return (
     <>
       <Navbar />
       <main className="min-h-screen bg-[#08090f] pt-16">
-
-        {/* Header */}
-        <div className="relative overflow-hidden border-b border-white/5">
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-brand-purple/10 blur-[80px] rounded-full" />
+        
+        {/* Hero Section */}
+        <div className="relative overflow-hidden pt-20 pb-12">
+          <div className="absolute inset-0 pointer-events-none flex justify-center">
+            <div className="w-[800px] h-[300px] bg-brand-purple/10 blur-[100px] rounded-full translate-y-[-50%]" />
           </div>
-          <div className="relative z-10 max-w-4xl mx-auto px-8 py-20">
-            <p className="text-xs font-bold text-brand-purple uppercase tracking-widest mb-4">Changelog</p>
-            <h1 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight">Release History</h1>
-            <p className="text-slate-400 text-lg max-w-xl leading-relaxed">
-              Every feature, fix, and improvement — documented per release. iconcodegen follows{" "}
-              <a href="https://semver.org" target="_blank" rel="noreferrer" className="text-brand-cyan hover:underline">Semantic Versioning</a>.
-            </p>
+          
+          <div className="relative z-10 max-w-3xl mx-auto px-6 text-center flex flex-col items-center">
+            <h1 className="text-5xl md:text-6xl font-black tracking-tight bg-gradient-to-br from-white to-white/40 bg-clip-text text-transparent">
+              Changelog
+            </h1>
           </div>
         </div>
 
-        {/* Releases */}
-        <div className="max-w-4xl mx-auto px-8 py-16">
+        {/* Latest Release (Hero Card) */}
+        <div className="max-w-4xl mx-auto px-6 mb-16">
+          <div className="relative group">
+            {/* Animated border gradient */}
+            <div className="absolute -inset-[1px] rounded-3xl bg-gradient-to-b from-brand-purple to-brand-cyan opacity-40 group-hover:opacity-100 transition-opacity duration-500" />
+            
+            <div className="relative bg-[#0d0f1a]/90 backdrop-blur-xl rounded-3xl p-8 md:p-12 overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-brand-cyan/10 blur-[60px] rounded-full pointer-events-none translate-x-1/2 -translate-y-1/2" />
+              
+              <div className="flex flex-wrap items-end justify-between gap-4 mb-10 border-b border-white/10 pb-6">
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="relative flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-purple opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-brand-purple"></span>
+                    </span>
+                    <span className="text-brand-purple font-bold tracking-widest uppercase text-xs">Latest Release</span>
+                  </div>
+                  <h2 className="text-4xl font-black text-white">v{latestRelease.version}</h2>
+                </div>
+                <div className="text-right">
+                  <p className="text-slate-400 font-mono text-sm mb-2">{latestRelease.date}</p>
+                  <a
+                    href={`https://github.com/nibin-org/iconcodegen/releases/tag/v${latestRelease.version}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs text-brand-cyan hover:text-white transition-colors"
+                  >
+                    View on GitHub
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M7 17L17 7M17 7H7M17 7v10" />
+                    </svg>
+                  </a>
+                </div>
+              </div>
+              <div>
+                {getAllEntries(latestRelease).length === 0 ? (
+                  <p className="text-slate-500 italic py-4">No items in this release.</p>
+                ) : (
+                  getAllEntries(latestRelease).map((entry, idx) => (
+                    <InlineEntry key={idx} entry={entry} />
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Older Releases (Compact List) */}
+        <div className="max-w-3xl mx-auto px-6 pb-32">
+          
+          <div className="flex flex-col items-center mb-10">
+            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-6">Previous Releases</h3>
+            
+            {/* Filter Bar */}
+            <div className="inline-flex bg-[#0d0f1a] p-1.5 rounded-xl border border-white/5 shadow-xl">
+              {(["All", "Added", "Changed", "Fixed"] as FilterType[]).map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setFilter(f)}
+                  className={`px-5 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer ${
+                    filter === f 
+                      ? "bg-brand-purple text-white shadow-md shadow-brand-purple/20" 
+                      : "text-slate-400 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  {f}
+                </button>
+              ))}
+            </div>
+          </div>
+          
           <div className="relative">
             {/* Timeline line */}
-            <div className="absolute left-[11px] top-2 bottom-0 w-px bg-gradient-to-b from-brand-purple/40 via-white/5 to-transparent hidden md:block" />
+            <div className="absolute left-[11px] top-6 bottom-0 w-px bg-gradient-to-b from-white/10 to-transparent hidden md:block" />
 
-            <div className="space-y-16">
-              {releases.map((release) => (
-                <div key={release.version} className="md:flex gap-10">
-                  {/* Timeline dot */}
-                  <div className="hidden md:flex flex-col items-center shrink-0 w-6 pt-1">
-                    <div className={`w-[10px] h-[10px] rounded-full border-2 shrink-0 ${release.latest ? "bg-brand-purple border-brand-purple shadow-lg shadow-brand-purple/50" : "bg-[#08090f] border-white/20"}`} />
-                  </div>
+            <div className="space-y-8">
+              {olderReleases.map((release) => {
+                const entries = getFilteredEntries(release);
+                // Only hide the entire block if a specific filter is active and there are no matches
+                if (filter !== "All" && entries.length === 0) return null;
 
-                  {/* Card */}
-                  <div className="flex-1 glass-panel rounded-2xl p-8 border border-white/5">
-                    {/* Version Header */}
-                    <div className="flex flex-wrap items-center gap-3 mb-8">
-                      <a
-                        href={`https://github.com/nibin-org/iconcodegen/releases/tag/v${release.version}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-2xl font-black text-white hover:text-brand-cyan transition-colors tracking-tight"
-                      >
-                        v{release.version}
-                      </a>
-                      {release.latest && (
-                        <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-brand-purple/20 text-brand-purple border border-brand-purple/30 uppercase tracking-widest">
-                          Latest
-                        </span>
-                      )}
-                      <span className="text-xs text-slate-600 ml-auto font-mono">{release.date}</span>
+                return (
+                  <div key={release.version} className="md:flex gap-8 relative z-10">
+                    {/* Timeline dot */}
+                    <div className="hidden md:flex flex-col items-center shrink-0 w-6 pt-6">
+                      <div className="w-[10px] h-[10px] rounded-full border-2 shrink-0 bg-[#08090f] border-white/20" />
                     </div>
 
-                    <ChangeGroup label="Added" entries={release.added} />
-                    <ChangeGroup label="Changed" entries={release.changed} />
-                    <ChangeGroup label="Fixed" entries={release.fixed} />
+                    <div className="flex-1 bg-white/[0.02] border border-white/5 rounded-2xl p-6 hover:bg-white/[0.04] transition-colors">
+                      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                        <div className="flex items-center gap-4">
+                          <h3 className="text-xl font-bold text-white">v{release.version}</h3>
+                          <span className="text-slate-500 text-xs font-mono">{release.date}</span>
+                        </div>
+                        <a
+                          href={`https://github.com/nibin-org/iconcodegen/releases/tag/v${release.version}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-white transition-colors"
+                          title="View on GitHub"
+                        >
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+                          </svg>
+                          GitHub
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-60">
+                            <path d="M7 17L17 7M17 7H7M17 7v10" />
+                          </svg>
+                        </a>
+                      </div>
 
-                    {/* GitHub Link */}
-                    <a
-                      href={`https://github.com/nibin-org/iconcodegen/releases/tag/v${release.version}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-2 text-xs text-slate-500 hover:text-slate-300 mt-4 transition-colors"
-                    >
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
-                      </svg>
-                      View on GitHub Releases
-                    </a>
+                      <div>
+                        {entries.length === 0 ? (
+                          <p className="text-slate-600 italic text-sm">No recorded changes.</p>
+                        ) : (
+                          entries.map((entry, idx) => (
+                            <InlineEntry key={idx} entry={entry} />
+                          ))
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
