@@ -1,304 +1,440 @@
-import Link from "next/link";
-import { Navbar } from "@/components/Navbar";
+"use client";
 
-const navItems = [
-  { label: "Getting Started", href: "#getting-started" },
-  { label: "Running the Dashboard", href: "#running" },
-  { label: "Iconify Provider", href: "#iconify" },
-  { label: "Untitled UI Pro", href: "#untitled-ui" },
-  { label: "Generated Component", href: "#generated-component" },
-  { label: "Configuration File", href: "#config" },
-  { label: "API Reference", href: "#api" },
+import { useState, useEffect } from "react";
+import { Navbar } from "@/components/Navbar";
+import { CopyButton } from "@/components/CopyButton";
+
+const NAV_ITEMS = [
+  { id: "initialize", label: "1. Initialize" },
+  { id: "dashboard", label: "2. Run dashboard" },
+  {
+    id: "day2",
+    label: "3. Day-2 commands",
+    children: [
+      { id: "prune", label: "Prune" },
+      { id: "audit", label: "Audit" },
+      { id: "sync", label: "Sync" },
+    ],
+  },
+  {
+    id: "providers",
+    label: "4. Providers",
+    children: [
+      { id: "provider-iconify", label: "Iconify" },
+      { id: "provider-untitled", label: "Untitled UI" },
+    ],
+  },
+  { id: "config", label: "5. Config reference" },
+  { id: "flags", label: "6. Flags" },
 ];
 
-function CodeBlock({ code, lang = "bash" }: { code: string; lang?: string }) {
-  const colorMap: Record<string, string> = {
-    bash: "text-brand-cyan",
-    tsx: "text-violet-300",
-    json: "text-amber-300",
-  };
-  return (
-    <pre className={`bg-[#0a0b12] border border-white/8 p-5 rounded-xl text-sm font-mono leading-relaxed overflow-x-auto ${colorMap[lang] || "text-slate-300"} shadow-inner`}>
-      <code>{code}</code>
-    </pre>
-  );
-}
+function CodeBlock({
+  code,
+  lang = "bash",
+  label,
+}: {
+  code: string;
+  lang?: "bash" | "json" | "output";
+  label?: string;
+}) {
+  const isCommand = lang === "bash";
+  const colorClass =
+    lang === "json" ? "text-amber-300" : lang === "output" ? "text-slate-400" : "text-brand-cyan";
 
-function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
-    <section id={id} className="scroll-mt-24 pb-16 border-b border-white/5 last:border-0">
-      <h2 className="text-2xl font-bold text-white mb-6">{title}</h2>
-      <div className="space-y-5 text-slate-400 leading-relaxed">{children}</div>
-    </section>
-  );
-}
-
-function Note({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex gap-3 bg-brand-cyan/5 border border-brand-cyan/20 rounded-xl p-4 text-sm text-brand-cyan">
-      <svg className="shrink-0 mt-0.5" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
-      <span>{children}</span>
+    <div className="mb-3 rounded-xl border border-white/8 bg-[#0d0e14] overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-white/8">
+        <span className="text-xs font-mono text-slate-500">{label || (isCommand ? "terminal" : lang)}</span>
+        {lang === "bash" && (
+          <CopyButton text={code} className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition-colors cursor-pointer" />
+        )}
+      </div>
+      <pre className={`px-4 py-3.5 text-[13px] font-mono leading-relaxed overflow-x-auto ${colorClass}`}>
+        <code
+          dangerouslySetInnerHTML={{
+            __html: lang === "output" ? highlightOutput(code) : escapeHtml(code),
+          }}
+        />
+      </pre>
     </div>
   );
 }
 
-function Warning({ children }: { children: React.ReactNode }) {
+function escapeHtml(s: string) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function highlightOutput(s: string) {
+  return escapeHtml(s).replace(
+    /\[(DRY RUN|BLOCKED|COLLISION|DUPLICATE|RENAME|INDEX)\]/g,
+    '<span class="text-amber-400">[$1]</span>'
+  );
+}
+
+function SectionHeading({ number, title }: { number: number; title: string }) {
   return (
-    <div className="flex gap-3 bg-amber-500/5 border border-amber-500/20 rounded-xl p-4 text-sm text-amber-400">
-      <svg className="shrink-0 mt-0.5" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
-      <span>{children}</span>
+    <div className="flex items-center gap-3 mb-5">
+      <div className="w-[22px] h-[22px] rounded-full bg-brand-cyan/15 text-brand-cyan text-xs font-bold flex items-center justify-center flex-shrink-0">
+        {number}
+      </div>
+      <h2 className="text-lg font-semibold text-white">{title}</h2>
     </div>
   );
+}
+
+function Section({
+  id,
+  number,
+  title,
+  children,
+}: {
+  id: string;
+  number: number;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div id={id} className="pt-12 first:pt-0 pb-12 border-b border-white/5 last:border-0 last:pb-0 scroll-mt-24">
+      <SectionHeading number={number} title={title} />
+      {children}
+    </div>
+  );
+}
+
+function SubCommand({
+  command,
+  desc,
+  output,
+}: {
+  command: string;
+  desc: string;
+  output: string;
+}) {
+  return (
+    <div id={command.split(" ")[2]} className="mb-10 last:mb-0 scroll-mt-24">
+      <CodeBlock code={command} />
+      <p className="text-sm text-slate-400 leading-relaxed mb-3">{desc}</p>
+      <div>
+        <CodeBlock code={output} lang="output" label="output" />
+      </div>
+    </div>
+  );
+}
+
+function MobileTOC({ activeId }: { activeId: string }) {
+  const [open, setOpen] = useState(false);
+
+  const activeLabel = NAV_ITEMS.flatMap((item) => [
+    { id: item.id, label: item.label },
+    ...(item.children ?? []),
+  ]).find((x) => x.id === activeId)?.label ?? "On this page";
+
+  return (
+    <div className="lg:hidden sticky top-16 z-40 bg-[#08090f]/95 backdrop-blur-xl border-b border-white/5">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="w-full flex items-center justify-between px-6 py-3 text-sm text-slate-300"
+      >
+        <div className="flex items-center gap-2">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-500">
+            <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="15" y2="18" />
+          </svg>
+          <span className="text-brand-cyan font-medium">{activeLabel}</span>
+        </div>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`text-slate-500 transition-transform ${open ? "rotate-180" : ""}`}>
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="px-6 pb-4 flex flex-col gap-0.5 border-t border-white/5">
+          {NAV_ITEMS.map((item) => (
+            <div key={item.id}>
+              <button
+                onClick={() => { smoothScrollTo(item.id); setOpen(false); }}
+                className="w-full text-left text-sm px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+              >
+                {item.label}
+              </button>
+              {item.children && (
+                <div className="ml-4 flex flex-col gap-0.5">
+                  {item.children.map((child) => (
+                    <button
+                      key={child.id}
+                      onClick={() => { smoothScrollTo(child.id); setOpen(false); }}
+                      className="w-full text-left text-xs px-3 py-1.5 rounded-md text-slate-500 hover:text-slate-300 hover:bg-white/5 transition-all"
+                    >
+                      {child.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// All section IDs to observe
+const ALL_IDS = ["initialize", "dashboard", "day2", "prune", "audit", "sync", "providers", "provider-iconify", "provider-untitled", "config", "flags"];
+
+function smoothScrollTo(id: string) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const top = el.getBoundingClientRect().top + window.scrollY - 88;
+  window.scrollTo({ top, behavior: "smooth" });
 }
 
 export default function DocsPage() {
+  const [activeId, setActiveId] = useState("initialize");
+  useEffect(() => {
+    const handleScroll = () => {
+      // Force last item if scrolled to the absolute bottom
+      if (Math.ceil(window.innerHeight + window.scrollY) >= document.documentElement.scrollHeight - 10) {
+        setActiveId(ALL_IDS[ALL_IDS.length - 1]);
+        return;
+      }
+
+      const elements = ALL_IDS.map((id) => document.getElementById(id)).filter(Boolean) as HTMLElement[];
+      
+      const visibleElements = elements.filter(el => {
+        const rect = el.getBoundingClientRect();
+        return rect.top < window.innerHeight && rect.bottom > 88;
+      });
+
+      if (visibleElements.length > 0) {
+        visibleElements.sort((a, b) => {
+          return Math.abs(a.getBoundingClientRect().top - 88) - Math.abs(b.getBoundingClientRect().top - 88);
+        });
+        setActiveId(visibleElements[0].id);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll(); // Initial check
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-[#08090f] pt-16 flex">
+      <MobileTOC activeId={activeId} />
+      <div className="min-h-screen bg-[#08090f] pt-16">
+        <div className="max-w-7xl mx-auto px-6 pt-14 flex gap-12">
+          {/* Sidebar */}
+          <aside className="hidden lg:block w-[260px] flex-shrink-0">
+            <div className="sticky top-[120px]">
+              {/* Glass card */}
+              <div className="rounded-2xl border border-white/8 bg-white/[0.03] backdrop-blur-md overflow-hidden">
+                {/* Top gradient accent bar */}
+                <div className="h-[2px] w-full" style={{ background: "linear-gradient(90deg, #7c3aed, #06b6d4)" }} />
 
-        {/* ── Sticky Sidebar ── */}
-        <aside className="hidden lg:flex flex-col w-64 shrink-0 sticky top-16 self-start h-[calc(100vh-64px)] border-r border-white/5 overflow-y-auto py-10 px-6">
-          <p className="text-xs font-bold text-slate-600 uppercase tracking-widest mb-4">On this page</p>
-          <nav className="flex flex-col gap-1">
-            {navItems.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className="text-sm text-slate-400 hover:text-white py-1.5 px-3 rounded-lg hover:bg-white/5 transition-all"
-              >
-                {item.label}
-              </a>
-            ))}
-          </nav>
+                <div className="p-4">
+                  {/* Label */}
+                  <div className="flex items-center gap-2 mb-4">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-500">
+                      <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="15" y2="18" />
+                    </svg>
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">On this page</span>
+                  </div>
 
-          <div className="mt-auto pt-8">
-            <a
-              href="https://github.com/nibin-org/iconcodegen/issues"
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-2 text-xs text-slate-500 hover:text-slate-300 transition-colors"
-            >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" /></svg>
-              Report an issue
-            </a>
-          </div>
-        </aside>
+                  {/* Nav items */}
+                  <nav className="flex flex-col gap-0.5">
+                    {NAV_ITEMS.map((item) => (
+                      <div key={item.id}>
+                        <a
+                          href={`#${item.id}`}
+                          onClick={(e) => { e.preventDefault(); smoothScrollTo(item.id); }}
+                          className={`group flex items-center gap-2.5 text-sm px-3 py-2 rounded-lg transition-all duration-200 ${
+                            activeId === item.id
+                              ? "bg-brand-cyan/10 text-brand-cyan"
+                              : "text-slate-400 hover:text-white hover:bg-white/5"
+                          }`}
+                        >
+                          {/* Left accent bar */}
+                          <span className={`w-[3px] h-4 rounded-full flex-shrink-0 transition-all duration-200 ${
+                            activeId === item.id
+                              ? "bg-brand-cyan"
+                              : "bg-white/0 group-hover:bg-white/20"
+                          }`} />
+                          {item.label}
+                        </a>
 
-        {/* ── Main Content ── */}
-        <main className="flex-1 max-w-3xl px-8 md:px-12 py-14 mx-auto lg:mx-0">
-          <div className="mb-12">
-            <div className="inline-flex items-center gap-2 text-xs font-bold text-brand-purple uppercase tracking-widest mb-4">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
-              Documentation
+                        {/* Child items with connector line */}
+                        {item.children && (
+                          <div className="relative ml-[22px] mt-0.5 mb-1 flex flex-col gap-0.5">
+                            {/* Vertical connector line */}
+                            <div className="absolute left-[5px] top-0 bottom-0 w-px bg-white/8" />
+                            {item.children.map((child) => (
+                              <a
+                                key={child.id}
+                                href={`#${child.id}`}
+                                onClick={(e) => { e.preventDefault(); smoothScrollTo(child.id); }}
+                                className={`relative flex items-center gap-2 text-xs px-3 py-1.5 rounded-md transition-all duration-150 ${
+                                  activeId === child.id
+                                    ? "text-brand-cyan"
+                                    : "text-slate-500 hover:text-slate-300"
+                                }`}
+                              >
+                                {/* Horizontal connector tick */}
+                                <span className={`w-2.5 h-px flex-shrink-0 transition-colors ${
+                                  activeId === child.id ? "bg-brand-cyan/60" : "bg-white/15"
+                                }`} />
+                                {child.label}
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </nav>
+                </div>
+              </div>
             </div>
-            <h1 className="text-4xl font-black text-white mb-4 tracking-tight">iconcodegen</h1>
-            <p className="text-lg text-slate-400 leading-relaxed">
-              A zero-config local CLI tool that opens a beautiful search dashboard for 200,000+ open-source icons — with one-click strictly-typed React component generation.
-            </p>
-          </div>
+          </aside>
 
-          <div className="space-y-16">
-            <Section id="getting-started" title="Getting Started">
-              <p>
-                <strong className="text-white">iconcodegen</strong> requires Node.js 18+ and an existing React or Next.js project. You do not need to install it globally — `npx` handles everything.
-              </p>
-              <p>Start by running the one-time initialization command inside your project root:</p>
-              <CodeBlock code="npx iconcodegen init" lang="bash" />
-              <p>The CLI will ask you two questions interactively:</p>
-              <div className="glass-panel rounded-xl p-5 space-y-3">
-                <div className="flex items-start gap-3">
-                  <span className="text-brand-purple font-mono text-sm shrink-0 mt-0.5">?</span>
-                  <div>
-                    <p className="text-white text-sm font-semibold">Where would you like to save your icons?</p>
-                    <p className="text-xs text-slate-500 mt-1">Default: <code className="text-slate-300">./src/components/icons</code></p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <span className="text-brand-purple font-mono text-sm shrink-0 mt-0.5">?</span>
-                  <div>
-                    <p className="text-white text-sm font-semibold">Which icon provider do you want to use?</p>
-                    <p className="text-xs text-slate-500 mt-1">Options: <code className="text-slate-300">iconify</code> (default) or <code className="text-slate-300">untitled-ui</code></p>
-                  </div>
-                </div>
+          {/* Main content */}
+          <main className="flex-1 pb-[47vh]">
+            <div className="mb-12">
+              <div className="inline-flex items-center gap-2 text-xs font-bold text-brand-purple uppercase tracking-widest mb-4">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg>
+                Documentation
               </div>
-              <p>This creates an <code className="text-slate-200 bg-white/5 px-1.5 py-0.5 rounded text-sm">iconcodegen.json</code> file in your project root. You only need to run init once per project.</p>
-            </Section>
-
-            <Section id="running" title="Running the Dashboard">
-              <p>After initialization, launch the visual search dashboard with:</p>
-              <CodeBlock code="npx iconcodegen" lang="bash" />
-              <p>This starts a local Express server (defaulting to port 3000, auto-incrementing if busy) and automatically opens the UI in your default browser. The terminal will confirm:</p>
-              <CodeBlock code={`🚀 iconcodegen is running at http://localhost:3000\nSaving icons to: ./src/components/icons`} lang="bash" />
-              <Note>The dashboard is fully local. Nothing you do is sent to any external server (unless you are using the Iconify provider, which fetches SVGs from the public Iconify CDN on demand).</Note>
-
-              <h3 className="text-white font-bold text-lg mt-8 mb-3">Barrel File Cleanup</h3>
-              <p>If you manually delete an icon file from your project, you will be left with a dead export in your `index.ts` file that breaks your build. To automatically clean this up, run:</p>
-              <CodeBlock code={`npx iconcodegen prune\n# Or to preview what will be deleted:\nnpx iconcodegen prune --dry-run`} lang="bash" />
-
-              <h3 className="text-white font-bold text-lg mt-8 mb-3">Find Unused Icons (Audit)</h3>
-              <p>Over time, you may download icons that you no longer use. To safely scan your codebase for orphaned icons, run:</p>
-              <CodeBlock code={`npx iconcodegen audit\n# Specify a different target directory to scan:\nnpx iconcodegen audit --target ./src/components`} lang="bash" />
-              <Note>The audit command is read-only. It uses strict AST analysis (not regex) to find dead code and will output `rm` commands for you to review and run manually.</Note>
-              <p className="text-sm mt-3 text-slate-400"><strong>Note:</strong> The scanner relies on the name of your target folder (e.g., <code className="bg-white/10 px-1 rounded">icons</code>) to identify imports. Path aliases that do not include the folder name (e.g. <code className="bg-white/10 px-1 rounded">@/ui/svg-pack</code>) will be missed.</p>
-
-              <h3 className="text-white font-bold text-lg mt-8 mb-3">Mass Renaming (Sync)</h3>
-              <p>If you change your <code className="text-slate-300">iconNamePattern</code> in the configuration file, your existing icons will not automatically update. To safely retroactively rename all your generated icons to match the new pattern, run:</p>
-              <CodeBlock code={`npx iconcodegen sync\n# Or to safely preview the renames:\nnpx iconcodegen sync --dry-run`} lang="bash" />
-              <Note>The sync engine is completely AST-driven. It groups files by their injected metadata (ignoring your manual file renames), gracefully handles collisions and duplicates, and performs a surgical string-replacement on your `index.ts` to preserve your code formatting and comments.</Note>
-
-              <h3 className="text-white font-bold text-lg mt-8 mb-3">Dashboard Features</h3>
-              <ul className="space-y-3 text-sm">
-                <li className="flex gap-3"><span className="text-brand-cyan shrink-0">→</span><span><strong className="text-white">Search:</strong> Debounced real-time search across all icons in the active provider.</span></li>
-                <li className="flex gap-3"><span className="text-brand-cyan shrink-0">→</span><span><strong className="text-white">Sidebar Filters:</strong> Filter by icon pack (e.g. `lucide`, `heroicons`) and style (e.g. `line`, `solid`).</span></li>
-                <li className="flex gap-3"><span className="text-brand-cyan shrink-0">→</span><span><strong className="text-white">Infinite Scroll:</strong> Icons load in batches using IntersectionObserver — no pagination.</span></li>
-                <li className="flex gap-3"><span className="text-brand-cyan shrink-0">→</span><span><strong className="text-white">Customization Panel:</strong> Click any icon to configure color, size, language (TS/JS), and export style (Arrow / Standard function).</span></li>
-                <li className="flex gap-3"><span className="text-brand-cyan shrink-0">→</span><span><strong className="text-white">Batch Export:</strong> Click the checkmark on multiple icons to open the slide-out Batch Drawer. Customize and export all selected icons simultaneously.</span></li>
-                <li className="flex gap-3"><span className="text-brand-cyan shrink-0">→</span><span><strong className="text-white">One-click Save:</strong> Downloads the generated `.tsx` or `.jsx` component directly into your configured `savePath`, and automatically updates your `index.ts` barrel file.</span></li>
-              </ul>
-            </Section>
-
-            <Section id="iconify" title="Provider: Iconify (Open Source)">
-              <p>
-                The <strong className="text-white">Iconify provider</strong> is the default. It connects to the public Iconify API to search and stream SVGs on demand. No local file installation or extra dependencies are required.
+              <h1 className="text-4xl font-black text-white mb-4 tracking-tight">iconcodegen</h1>
+              <p className="text-lg text-slate-400 leading-relaxed">
+                Complete command reference for setting up and maintaining your icon library.
               </p>
-              <p>It provides access to a curated whitelist of the most popular and highest-quality icon packs:</p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {["Material Design Icons (mdi)", "Phosphor Icons (ph)", "Lucide (lucide)", "Heroicons (heroicons)", "Bootstrap Icons (bi)", "Tabler Icons (tabler)", "Radix UI Icons", "Feather Icons", "Remix Icons (ri)", "Carbon Icons", "Ionicons (ion)"].map(p => (
-                  <div key={p} className="bg-white/3 border border-white/5 rounded-lg px-3 py-2 text-xs text-slate-300">{p}</div>
-                ))}
-              </div>
-              <Note>Style filtering (line / solid / duotone) is supported for Iconify by appending the style as a keyword to the Iconify search query.</Note>
-            </Section>
+            </div>
 
-            <Section id="untitled-ui" title="Provider: Untitled UI Pro (Premium)">
-              <p>
-                iconcodegen includes a unique <strong className="text-white">Reverse-Rendering Engine</strong> built for teams using <a href="https://untitledui.com" target="_blank" rel="noreferrer" className="text-brand-purple hover:underline">Untitled UI Pro</a>. Instead of reading SVG files from disk, it dynamically renders the React components from the npm package into raw SVG strings in memory, then serves them to the dashboard — completely offline.
-              </p>
-
-              <Warning>This provider requires that you have separately purchased a license for Untitled UI Pro and have access to their private npm registry.</Warning>
-
-              <h3 className="text-white font-bold text-lg mt-8 mb-4">Setup</h3>
-              <div className="space-y-5">
-                <div className="glass-panel rounded-xl p-5">
-                  <p className="text-xs font-bold text-brand-purple uppercase tracking-widest mb-3">Step 1 — Install the package</p>
-                  <CodeBlock code="npm install @untitledui-pro/icons" lang="bash" />
-                  <p className="text-xs text-slate-500 mt-3">You must be authenticated with the Untitled UI private npm registry first.</p>
-                </div>
-                <div className="glass-panel rounded-xl p-5">
-                  <p className="text-xs font-bold text-brand-purple uppercase tracking-widest mb-3">Step 2 — Initialize with untitled-ui</p>
-                  <CodeBlock code={`npx iconcodegen init\n# → Select: untitled-ui`} lang="bash" />
-                </div>
-                <div className="glass-panel rounded-xl p-5">
-                  <p className="text-xs font-bold text-brand-purple uppercase tracking-widest mb-3">Step 3 — Launch</p>
-                  <CodeBlock code="npx iconcodegen" lang="bash" />
-                  <p className="text-sm mt-3 text-slate-400">The CLI will automatically discover all available style categories (`line`, `solid`, `duotone`, `duocolor`) and index your entire library. You will see a confirmation like:</p>
-                  <CodeBlock code="✅ Successfully indexed 3,240 premium Untitled UI icons." lang="bash" />
-                </div>
-              </div>
-            </Section>
-
-            <Section id="generated-component" title="Generated Component">
-              <p>
-                When you save an icon, iconcodegen generates a clean, production-ready React component. Here is an example of the TypeScript output for a Lucide arrow icon:
-              </p>
-              <CodeBlock code={`/* eslint-disable */
-// @ts-nocheck
-// THIS FILE IS AUTO-GENERATED
-
-import * as React from "react";
-
-export function ArrowRightIcon({
-  width = 24,
-  height = 24,
-  color = "currentColor",
-  ...props
-}: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke={color}
-      strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
-      width={width} height={height} {...props}>
-      <path d="M5 12h14"/>
-      <path d="m12 5 7 7-7 7"/>
-    </svg>
-  );
-}`} lang="tsx" />
-              <p>The generator automatically:</p>
-              <ul className="space-y-2 text-sm list-disc list-inside">
-                <li>Converts all SVG attributes to camelCase JSX props (`stroke-width` → `strokeWidth`)</li>
-                <li>Strips hardcoded `width` and `height` from the SVG source, replacing them with dynamic props</li>
-                <li>Removes any existing `color` attributes to avoid conflicts with the React `color` prop</li>
-                <li>Injects <code className="text-slate-200 bg-white/5 px-1 rounded text-xs">{"{"}"...props{"}"}</code> spread for full composability</li>
-                <li>Includes global linter overrides to bypass strict CI checks on generated code</li>
-                <li>Automatically updates an `index.ts` (or `index.js`) barrel file in the save folder so you can import all icons from a single path</li>
-              </ul>
-            </Section>
-
-            <Section id="config" title="Configuration File">
-              <p>The <code className="text-slate-200 bg-white/5 px-1.5 py-0.5 rounded text-sm">iconcodegen.json</code> file created at your project root controls all behavior:</p>
-              <CodeBlock code={`{\n  "savePath": "./src/components/icons",\n  "provider": "iconify",\n  "iconNamePattern": "{name}Icon"\n}`} lang="json" />
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm border-collapse">
-                  <thead>
-                    <tr className="border-b border-white/10">
-                      <th className="text-left py-3 pr-6 text-white font-semibold">Key</th>
-                      <th className="text-left py-3 pr-6 text-white font-semibold">Type</th>
-                      <th className="text-left py-3 text-white font-semibold">Description</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5">
-                    <tr>
-                      <td className="py-3 pr-6 font-mono text-brand-cyan">savePath</td>
-                      <td className="py-3 pr-6 text-slate-500">string</td>
-                      <td className="py-3 text-slate-400">Relative path from your project root where generated components are saved.</td>
-                    </tr>
-                    <tr>
-                      <td className="py-3 pr-6 font-mono text-brand-cyan">provider</td>
-                      <td className="py-3 pr-6 text-slate-500">`iconify` | `untitled-ui`</td>
-                      <td className="py-3 text-slate-400">The icon backend to use. Determines which search engine and SVG source is used.</td>
-                    </tr>
-                    <tr>
-                      <td className="py-3 pr-6 font-mono text-brand-cyan">iconNamePattern</td>
-                      <td className="py-3 pr-6 text-slate-500">string</td>
-                      <td className="py-3 text-slate-400">Enforces a strict component naming convention. Must contain the `{`name`}` token. Examples: `{`name`}Icon`, `App{`name`}`.</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <div className="mt-4 p-4 rounded-lg bg-brand-cyan/10 border border-brand-cyan/20">
-                <p className="text-sm text-brand-cyan flex items-start gap-2">
-                  <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                  <span><strong>Hot Reloading:</strong> You don't need to restart the CLI when modifying <code className="text-brand-cyan bg-brand-cyan/10 px-1 py-0.5 rounded">iconcodegen.json</code>. The server actively watches the file and instantly hot-reloads your changes.</span>
+            <div className="space-y-0">
+              <Section id="initialize" number={1} title="Initialize">
+                <CodeBlock code="npx iconcodegen init" />
+                <p className="text-sm text-slate-400 leading-relaxed mb-3">
+                  Asks for your save path and provider, then writes an{" "}
+                  <code className="bg-white/5 px-1.5 py-0.5 rounded text-xs">iconcodegen.json</code> to your
+                  project root.
                 </p>
-              </div>
-            </Section>
+                <CodeBlock
+                  lang="json"
+                  label="iconcodegen.json"
+                  code={`{\n  "savePath": "./src/components/icons",\n  "provider": "iconify",\n  "iconNamePattern": "{name}Icon"\n}`}
+                />
+              </Section>
 
-            <Section id="api" title="API Reference">
-              <p>iconcodegen runs a local Express server. These are the internal API endpoints it exposes to the dashboard UI:</p>
-              <div className="space-y-4">
-                {[
-                  { method: "GET", path: "/api/search", desc: "Search icons. Accepts `query`, `limit`, `start`, `packs`, `styles` query params. Returns `{ icons: string[] }`." },
-                  { method: "GET", path: "/api/svg", desc: "Fetch a raw SVG string for a given icon ID. Accepts `id` and optional `color` query params." },
-                  { method: "GET", path: "/api/filters", desc: "Returns available `packs` and `styles` for the active provider." },
-                  { method: "GET", path: "/api/config", desc: "Returns the active provider name: `{ provider: string }`." },
-                  { method: "POST", path: "/api/download", desc: "Generates and writes a React component file to disk. Body: `{ icon_id, customizations }`." },
-                  { method: "POST", path: "/api/batch-generate", desc: "Generates multiple components and updates the barrel file. Body: `{ icons, customizations }`." },
-                  { method: "POST", path: "/api/generate-snippet", desc: "Generates and returns a React component as a string without saving. Body: `{ icon_id, customizations }`." },
-                ].map((ep) => (
-                  <div key={ep.path} className="glass-panel rounded-xl p-5 flex flex-col sm:flex-row gap-3 sm:items-start">
-                    <span className={`shrink-0 font-mono text-xs font-black px-2.5 py-1 rounded-md ${ep.method === "GET" ? "bg-brand-cyan/15 text-brand-cyan" : "bg-brand-purple/15 text-brand-purple"}`}>
-                      {ep.method}
-                    </span>
-                    <div>
-                      <code className="text-white text-sm font-mono">{ep.path}</code>
-                      <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">{ep.desc}</p>
-                    </div>
+              <Section id="dashboard" number={2} title="Run the dashboard">
+                <CodeBlock code="npx iconcodegen" />
+                <p className="text-sm text-slate-400 leading-relaxed">
+                  Spins up the local visual dashboard at{" "}
+                  <code className="bg-white/5 px-1.5 py-0.5 rounded text-xs">http://127.0.0.1:3000</code> to
+                  instantly search and generate typed React icons.
+                </p>
+                <p className="text-sm text-slate-500 mt-2">
+                  If port 3000 is busy, the server automatically tries 3001, 3002, and so on.
+                </p>
+              </Section>
+
+              <Section id="day2" number={3} title="Day-2 commands">
+
+
+                <SubCommand
+                  command="npx iconcodegen prune"
+                  desc="Removes barrel-file exports pointing to icons you've deleted manually."
+                  output={`🔍 Scanning ./src/components/icons for barrel files...\n🗑️  [DRY RUN] Would remove dangling export: AirplayIcon (file not found)\n🗑️  [DRY RUN] Would remove dangling export: CustomThing (file not found)\n✅ Dry run complete. Found 2 missing export(s) to remove.`}
+                />
+
+                <SubCommand
+                  command="npx iconcodegen audit"
+                  desc="Reports icons that aren't imported anywhere in your code. Read-only — never deletes anything."
+                  output={`🔍 Scanning ./src for imported icons...\n📦 Found 6 total icons in ./src/components/icons\n✅ Found 1 explicitly imported in your code.\n\n⚠️  5 icons found with no direct static import detected.\nPlease verify manually before removing, especially if you use dynamic selection.\n\n  ⚠️  IMPORTANT: This scanner only matches import paths containing the\n  literal string "icons" (e.g. '@/components/icons', '../icons'). If\n  your project imports icons through an alias that does NOT contain\n  that word (e.g. '@/ui/svg-pack'), this tool cannot see those imports\n  and WILL incorrectly list those icons as unused. If you use custom\n  path aliases, verify manually — do not trust this report blindly.\n\n[LIMITATIONS] The scanner ONLY detects static named imports:\n  ✅ Detects: import { ArrowIcon } from '@/icons'\n  ❌ Ignores: import * as Icons from '@/icons' (Wildcards)\n  ❌ Ignores: import(iconName) (Dynamic Imports)\n  ❌ Ignores: Re-exported barrel chains across monorepo boundaries\n\nTo manually remove these 5 potentially unused icons, review and run:\n\n  rm ./src/components/icons/ActivityIcon.tsx \\\n     ./src/components/icons/AirplayIcon.tsx \\\n     ./src/components/icons/AlarmCheckIcon.tsx \\\n     ./src/components/icons/CameraIcon.tsx \\\n     ./src/components/icons/CheckIcon.tsx`}
+                />
+
+                <SubCommand
+                  command="npx iconcodegen sync"
+                  desc="Renames existing icons to match a naming pattern you've changed in config. Safe — supports --dry-run and blocks anything it's unsure about."
+                  output={`Iconcodegen Sync\n--------------------------------------------------\n[RENAME]     ActivityIcon.tsx → SuperActivity.tsx\n[RENAME]     AlarmCheckIcon.tsx → SuperAlarmCheck.tsx\n[RENAME]     AnotherHome.tsx → SuperHome.tsx\n[RENAME]     AppBell.tsx → SuperBell.tsx\n[INDEX]      Rewrote 4 export(s) in index.ts\n[COLLISION]  CameraIcon.tsx (Target SuperCamera.tsx already exists)\n[BLOCKED]    CheckIcon.tsx (Manual or aliased export reference found in index.ts)\n[DUPLICATE]  HomeIcon.tsx (Shares metadata with another file)\n--------------------------------------------------\nSummary: 4 Rename, 1 Collision, 1 Blocked, 1 Duplicate, 0 Unsupported, 0 Keep`}
+                />
+              </Section>
+
+              <Section id="providers" number={4} title="Providers">
+                <p className="text-sm text-slate-400 leading-relaxed mb-6">
+                  The <code className="bg-white/5 px-1.5 py-0.5 rounded text-xs">provider</code> field in your config controls which icon backend is used.
+                </p>
+
+                <div id="provider-iconify" className="mb-8 scroll-mt-24">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-xs font-bold bg-brand-cyan/15 text-brand-cyan px-2.5 py-1 rounded-full font-mono">iconify</span>
+                    <span className="text-xs text-slate-500">Default</span>
                   </div>
-                ))}
-              </div>
-            </Section>
-          </div>
-        </main>
+                  <p className="text-sm text-slate-400 leading-relaxed mb-3">
+                    Fetches SVGs on demand from the public Iconify API — zero local dependencies required. Supports 11 curated icon packs: <span className="text-slate-300">mdi, ph, lucide, heroicons, bi, tabler, radix-icons, feather, ri, carbon, ion</span>.
+                  </p>
+                  <CodeBlock lang="json" label="iconcodegen.json" code={`{\n  "provider": "iconify"\n}`} />
+                </div>
+
+                <div id="provider-untitled" className="scroll-mt-24">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-xs font-bold bg-brand-purple/15 text-brand-purple px-2.5 py-1 rounded-full font-mono">untitled-ui</span>
+                    <span className="text-xs text-slate-500">Requires @untitledui-pro/icons</span>
+                  </div>
+                  <p className="text-sm text-slate-400 leading-relaxed mb-3">
+                    Renders icons fully offline using your locally installed <code className="bg-white/5 px-1.5 py-0.5 rounded text-xs">@untitledui-pro/icons</code> package. Scans all 4 style categories (line, solid, duotone, duocolor) and indexes them on startup. No external requests — ever.
+                  </p>
+                  <CodeBlock lang="json" label="iconcodegen.json" code={`{\n  "provider": "untitled-ui"\n}`} />
+                </div>
+              </Section>
+
+              <Section id="config" number={5} title="Config reference">
+                <CodeBlock
+                  lang="json"
+                  label="iconcodegen.json"
+                  code={`{\n  "savePath": "./src/components/icons",   // Where generated components are saved\n  "provider": "iconify",                  // Backend: "iconify" or "untitled-ui"\n  "iconNamePattern": "{name}Icon"         // Enforces strict naming (e.g. "{name}Icon")\n}`}
+                />
+              </Section>
+
+              <Section id="flags" number={6} title="Flags">
+                <div className="overflow-x-auto mt-1">
+                  <table className="w-full text-sm text-left text-slate-400">
+                    <thead className="text-xs uppercase text-slate-500 border-b border-white/10">
+                      <tr>
+                        <th className="px-4 py-3">Flag</th>
+                        <th className="px-4 py-3">Description</th>
+                        <th className="px-4 py-3">Supported by</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      <tr>
+                        <td className="px-4 py-3 font-mono text-brand-cyan">--dry-run</td>
+                        <td className="px-4 py-3">Previews changes without touching any files.</td>
+                        <td className="px-4 py-3 font-mono text-xs">prune, sync</td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-3 font-mono text-brand-cyan">--target</td>
+                        <td className="px-4 py-3">Overrides the source code directory to scan.</td>
+                        <td className="px-4 py-3 font-mono text-xs">audit</td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-3 font-mono text-brand-cyan">--port</td>
+                        <td className="px-4 py-3">Changes the dashboard server port.</td>
+                        <td className="px-4 py-3 font-mono text-xs">(default start)</td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-3 font-mono text-brand-cyan">--headless</td>
+                        <td className="px-4 py-3">Starts the server without opening the browser.</td>
+                        <td className="px-4 py-3 font-mono text-xs">(default start)</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </Section>
+            </div>
+          </main>
+        </div>
       </div>
     </>
   );

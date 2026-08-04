@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 
-export function CopyButton({ text }: { text: string }) {
+export function CopyButton({ text, className = "text-slate-500 hover:text-white transition-colors cursor-pointer" }: { text: string; className?: string }) {
   const [copied, setCopied] = useState(false);
 
   const copy = async () => {
@@ -13,7 +13,7 @@ export function CopyButton({ text }: { text: string }) {
   return (
     <button
       onClick={copy}
-      className="text-slate-500 hover:text-white transition-colors"
+      className={className}
       title="Copy to clipboard"
     >
       {copied ? (
